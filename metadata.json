@@ -1,0 +1,8 @@
+{
+  "name": "Giovanni Mérida - Entrenador Personal & Reservas",
+  "description": "Landing page y plataforma de reserva de entrenamientos personalizados con sincronización directa en Google Calendar y confirmación por Gmail.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
