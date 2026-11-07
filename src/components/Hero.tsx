@@ -7,7 +7,7 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onOpenCalculator }) => {
   return (
-    <section className="relative w-full bg-[#111111] overflow-hidden pt-10 pb-16 sm:pt-16 sm:pb-24">
+    <section className="relative w-full bg-[#111111] overflow-hidden pt-10 pb-32 sm:pt-16 sm:pb-44 lg:pb-48">
       {/* Background athlete image anchored to the top to show full head and background */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <img
@@ -20,7 +20,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCalculator }) => {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
-        <div className="space-y-6 max-w-3xl">
+        <div className="space-y-6 max-w-3xl pt-8 sm:pt-12">
           {/* Main Heading */}
           <h1 className="font-montserrat font-black text-3xl sm:text-5xl lg:text-[56px] text-white leading-[1.05] tracking-tight uppercase">
             ENTRENAMIENTO <br />
