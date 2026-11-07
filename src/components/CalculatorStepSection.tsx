@@ -41,13 +41,6 @@ export const CalculatorStepSection: React.FC<CalculatorStepSectionProps> = ({
             <p className="font-montserrat text-xs sm:text-[13px] text-[#a0a0a0] max-w-md leading-relaxed pt-1">
               Ingresa tus datos y cuéntanos sobre tus objetivos. En segundos, obtendrás tu nivel de entrenamiento y un plan diseñado para ti.
             </p>
-
-            {/* Giant STRENGTH text positioned under heading/athlete exactly as in PDF */}
-            <div className="pt-8 select-none pointer-events-none">
-              <span className="font-montserrat font-black text-4xl sm:text-6xl md:text-7xl text-white tracking-tighter uppercase">
-                STRENGTH
-              </span>
-            </div>
           </div>
 
           {/* Right Column: Amplified "Calcula Aquí" Red Block */}
