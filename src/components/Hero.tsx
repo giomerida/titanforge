@@ -7,16 +7,16 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onOpenCalculator }) => {
   return (
-    <section className="relative w-full bg-[#111111] overflow-hidden pt-16 sm:pt-24 pb-16 sm:pb-24">
-      {/* Background athlete image without opacity reduction */}
+    <section className="relative w-full bg-[#111111] overflow-hidden pt-10 pb-16 sm:pt-16 sm:pb-24">
+      {/* Background athlete image anchored to the top to show full head and background */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <img
           src={fondoHeader}
           alt="Fondo Atleta Titan Forge"
-          className="w-full h-full object-cover object-right md:object-center filter contrast-110 brightness-95"
+          className="w-full h-full object-cover object-[85%_top] sm:object-[80%_top] md:object-[right_top] filter contrast-110 brightness-95"
         />
-        {/* Soft gradient from left to ensure text legibility while keeping the image crisp */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent" />
+        {/* Soft gradient from left to ensure text legibility while keeping the athlete crisp */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
