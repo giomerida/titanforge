@@ -345,7 +345,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
               <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 sm:p-7">
                 <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                   <div className="flex items-center gap-2.5">
-                    <span className="w-6 h-6 rounded-full bg-red-600/20 text-red-500 text-xs font-bold flex items-center justify-center">
+                    <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center">
                       1
                     </span>
                     <h3 className="text-base font-bold text-white font-display">
@@ -353,9 +353,9 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                     </h3>
                   </div>
 
-                  {/* Mode selector: Solo presencial */}
-                  <div className="flex items-center gap-2 bg-zinc-950 px-3 py-1.5 rounded-lg border border-red-500/30 text-xs text-white font-bold">
-                    <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+                  {/* Mode selector: Solo presencial con el mismo estilo del paso 2 */}
+                  <div className="flex items-center gap-2 bg-zinc-950 px-3 py-1.5 rounded-lg border border-amber-500/30 text-xs text-amber-400 font-bold">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
                     <span>Presencial</span>
                   </div>
                 </div>
@@ -377,16 +377,18 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                         onClick={() => onServiceChange(srv)}
                         className={`text-left p-4 rounded-xl border transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-red-600/15 border-red-500 shadow-md ring-1 ring-red-500/40'
+                            ? 'bg-amber-500/15 border-amber-400 shadow-md ring-1 ring-amber-400/40'
                             : 'bg-zinc-950/60 border-zinc-800 hover:border-zinc-700'
                         }`}
                       >
                         <div className="flex items-center justify-between gap-1 mb-1">
-                          <span className="text-sm font-montserrat font-black uppercase tracking-wider text-white">
+                          <span className={`text-sm font-montserrat font-black uppercase tracking-wider ${
+                            isSelected ? 'text-amber-300' : 'text-white'
+                          }`}>
                             {planBadgeName}
                           </span>
                           {srv.popular && (
-                            <span className="text-[9px] font-bold uppercase bg-red-600/30 text-red-400 px-1.5 py-0.5 rounded">
+                            <span className="text-[9px] font-bold uppercase bg-amber-500/30 text-amber-300 px-1.5 py-0.5 rounded">
                               Top
                             </span>
                           )}
@@ -394,7 +396,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                         <div className="text-[11px] text-zinc-300 font-medium line-clamp-1">
                           {srv.title.split('·')[1]?.trim() || srv.title}
                         </div>
-                        <div className="text-xs text-red-400 font-bold mt-2">{srv.price}</div>
+                        <div className="text-xs text-amber-400 font-bold mt-2">{srv.price}</div>
                         <div className="text-[10px] text-zinc-500 mt-0.5">{srv.durationMinutes} min · Presencial</div>
                       </button>
                     );
