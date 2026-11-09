@@ -76,6 +76,13 @@ export default function App() {
     scrollToBooking();
   };
 
+  const scrollToCalculator = () => {
+    const el = document.getElementById('calculadora');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col selection:bg-red-600 selection:text-white">
       {/* Fixed Header with Titan Forge Logo & Menu */}
@@ -85,26 +92,27 @@ export default function App() {
         onLogout={handleLogout}
         isLoggingIn={isLoggingIn}
         onScrollToBooking={scrollToBooking}
-        onOpenCalculator={() => setIsCalculatorOpen(true)}
+        onOpenCalculator={scrollToCalculator}
       />
 
       {/* Main Content Sections strictly reflecting the shared PDF Design */}
       <main className="flex-1">
-        {/* 1. HERO: "ENTRENAMIENTO PERSONALIZADO A TU MEDIDA" + STRONGER Watermark */}
+        {/* 1. HERO: "ENTRENAMIENTO PERSONALIZADO A TU MEDIDA" */}
         <Hero
-          onOpenCalculator={() => setIsCalculatorOpen(true)}
+          onOpenCalculator={scrollToCalculator}
           onScrollToBooking={scrollToBooking}
         />
 
         {/* Separador: Barra negra 5 veces más grande y sin contornos */}
         <div className="w-full h-16 sm:h-20 bg-black" />
 
-        {/* 2. PASO 1: "USA NUESTRA CALCULADORA" + STRENGTH Watermark + Red Block */}
+        {/* 2. PASO 1: "USA NUESTRA CALCULADORA" + Calculadora Interactiva en bloque rojo */}
         <CalculatorStepSection
-          onOpenCalculator={() => setIsCalculatorOpen(true)}
+          onSelectPlanAndBook={handleSelectPlanAndBook}
+          onOpenCalculator={scrollToCalculator}
         />
 
-        {/* 3. PASO 2: "RECIBE TU PROGRAMA" - PRINCIPIANTE, INTERMEDIO, AVANZADO with VER PLAN popup */}
+        {/* 3. PASO 2: "RECIBE TU PROGRAMA" - FUNDATION, PERFORMANCE, ELITE with VER PLAN popup */}
         <ProgramStepSection
           services={SERVICES_DATA}
           onSelectPlanAndBook={handleSelectPlanAndBook}
@@ -127,7 +135,7 @@ export default function App() {
 
         {/* 8. White Banner Footer: "¿LISTO PARA EMPEZAR? Tu objetivo esta a un clic de distancia" */}
         <ReadyToStartCTA
-          onOpenCalculator={() => setIsCalculatorOpen(true)}
+          onOpenCalculator={scrollToCalculator}
         />
       </main>
 

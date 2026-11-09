@@ -28,8 +28,8 @@ export interface TestimonialItem {
 export const SERVICES_DATA: ServiceItem[] = [
   {
     id: 'principiante-plan',
-    title: 'Plan Principiante · Cimientos de Fuerza',
-    category: 'Fuerza Base & Técnica',
+    title: 'Fundation · Cimientos de Fuerza',
+    category: 'Plan Fundation',
     durationMinutes: 60,
     price: '$35 USD',
     description: 'Enfocado en dominar los patrones motores fundamentales (sentadilla, bisagra de cadera, empuje y tracción) con técnica rigurosa y sin riesgo articular.',
@@ -45,8 +45,8 @@ export const SERVICES_DATA: ServiceItem[] = [
   },
   {
     id: 'intermedio-plan',
-    title: 'Plan Intermedio · Hipertrofia & Rendimiento',
-    category: 'Musculación Avanzada',
+    title: 'Performance · Hipertrofia & Rendimiento',
+    category: 'Plan Performance',
     durationMinutes: 60,
     price: '$45 USD',
     description: 'Protocolo de hipertrofia y fuerza por grupos musculares (Torso/Pierna o Push-Pull-Legs) aplicando RIR controlado para romper estancamientos.',
@@ -62,8 +62,8 @@ export const SERVICES_DATA: ServiceItem[] = [
   },
   {
     id: 'avanzado-plan',
-    title: 'Plan Avanzado · Rendimiento de Élite & Fuerza Máxima',
-    category: 'Atletas & Fuerza Pura',
+    title: 'Elite · Rendimiento & Fuerza Máxima',
+    category: 'Plan Elite',
     durationMinutes: 60,
     price: '$55 USD',
     description: 'Periodización ondulante diaria con alta especificidad biomecánica, potencia explosiva y optimización metabólica de alto nivel competitivo.',

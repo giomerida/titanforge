@@ -232,13 +232,13 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="text-xs sm:text-sm font-black tracking-widest uppercase text-red-600 mb-2 flex items-center justify-center gap-1.5">
             <CalendarIcon className="w-4 h-4" />
-            <span>Sistema de Agendamiento Titan Forge</span>
+            <span>Agenda tu sesión presencial Titan Forge</span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-black text-white uppercase tracking-tight">
-            Agenda tu Sesión de Entrenamiento
+            Agenda tu Sesión Personalizada
           </h2>
           <p className="text-zinc-400 mt-4 text-sm sm:text-base leading-relaxed">
-            Elige tu plan, selecciona tu fecha y horario preferido. El evento se programará automáticamente en Google Calendar y se enviarán confirmaciones inmediatas por Gmail a ti y a tu coach.
+            Selecciona tu plan, tu fecha y horario disponible. El evento se programará automáticamente en Google Calendar y se enviarán confirmaciones inmediatas por Gmail a ti y a tu coach.
           </p>
         </div>
 
@@ -273,8 +273,8 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
               </div>
               <div className="flex justify-between items-center py-1 border-b border-zinc-900">
                 <span className="text-zinc-400">Modalidad</span>
-                <span className="font-medium text-white capitalize">
-                  {confirmedBooking.details.trainingType === 'presencial' ? 'Presencial (Gimnasio)' : 'Online en directo'}
+                <span className="font-medium text-white">
+                  Presencial (Gimnasio Titan Forge)
                 </span>
               </div>
               <div className="flex justify-between items-center py-1 border-b border-zinc-900">
@@ -343,60 +343,59 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
             <div className="lg:col-span-7 space-y-8">
               {/* Step 1: Service selection dropdown/tabs */}
               <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 sm:p-7">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                   <div className="flex items-center gap-2.5">
-                    <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center">
+                    <span className="w-6 h-6 rounded-full bg-red-600/20 text-red-500 text-xs font-bold flex items-center justify-center">
                       1
                     </span>
                     <h3 className="text-base font-bold text-white font-display">
-                      Selecciona tu Modalidad y Servicio
+                      Selecciona tu Plan de Entrenamiento
                     </h3>
                   </div>
 
-                  {/* Mode selector */}
-                  <div className="flex items-center bg-zinc-950 p-1 rounded-lg border border-zinc-800 text-xs">
-                    <button
-                      type="button"
-                      onClick={() => setTrainingType('presencial')}
-                      className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
-                        trainingType === 'presencial'
-                          ? 'bg-amber-500 text-zinc-950 font-bold'
-                          : 'text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      Presencial
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTrainingType('online')}
-                      className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
-                        trainingType === 'online'
-                          ? 'bg-amber-500 text-zinc-950 font-bold'
-                          : 'text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      Online
-                    </button>
+                  {/* Mode selector: Solo presencial */}
+                  <div className="flex items-center gap-2 bg-zinc-950 px-3 py-1.5 rounded-lg border border-red-500/30 text-xs text-white font-bold">
+                    <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+                    <span>Presencial</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {SERVICES_DATA.map((srv) => {
                     const isSelected = srv.id === selectedService.id;
+                    const planBadgeName =
+                      srv.levelKey === 'principiante'
+                        ? 'Fundation'
+                        : srv.levelKey === 'intermedio'
+                        ? 'Performance'
+                        : 'Elite';
+
                     return (
                       <button
                         type="button"
                         key={srv.id}
                         onClick={() => onServiceChange(srv)}
-                        className={`text-left p-3.5 rounded-xl border transition-all ${
+                        className={`text-left p-4 rounded-xl border transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-amber-500/10 border-amber-400 shadow-sm'
+                            ? 'bg-red-600/15 border-red-500 shadow-md ring-1 ring-red-500/40'
                             : 'bg-zinc-950/60 border-zinc-800 hover:border-zinc-700'
                         }`}
                       >
-                        <div className="text-xs font-bold text-white line-clamp-1">{srv.title}</div>
-                        <div className="text-[11px] text-amber-400 font-semibold mt-1">{srv.price}</div>
-                        <div className="text-[10px] text-zinc-400 mt-0.5">{srv.durationMinutes} min</div>
+                        <div className="flex items-center justify-between gap-1 mb-1">
+                          <span className="text-sm font-montserrat font-black uppercase tracking-wider text-white">
+                            {planBadgeName}
+                          </span>
+                          {srv.popular && (
+                            <span className="text-[9px] font-bold uppercase bg-red-600/30 text-red-400 px-1.5 py-0.5 rounded">
+                              Top
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-zinc-300 font-medium line-clamp-1">
+                          {srv.title.split('·')[1]?.trim() || srv.title}
+                        </div>
+                        <div className="text-xs text-red-400 font-bold mt-2">{srv.price}</div>
+                        <div className="text-[10px] text-zinc-500 mt-0.5">{srv.durationMinutes} min · Presencial</div>
                       </button>
                     );
                   })}
@@ -674,7 +673,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                 <strong>Fecha & Hora:</strong> {selectedDate} a las {selectedSlot}
               </p>
               <p>
-                <strong>Modalidad:</strong> {trainingType.toUpperCase()}
+                <strong>Modalidad:</strong> PRESENCIAL (Gimnasio Titan Forge)
               </p>
               <p>
                 <strong>Cliente:</strong> {clientName} ({clientEmail})

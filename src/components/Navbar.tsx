@@ -105,12 +105,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             Sobre Titan Forge
           </a>
-          <a
-            href="#reservas"
-            className="hover:text-[#E50914] transition-colors"
-          >
-            Contacto
-          </a>
         </nav>
 
         {/* Right CTA Button: Comienza ahora with arrow in PDF */}

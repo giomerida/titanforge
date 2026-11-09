@@ -65,10 +65,6 @@ export const ReadyToStartCTA: React.FC<ReadyToStartCTAProps> = ({
           <a href="#sobre-titan-forge" className="hover:text-[#E50914] transition-colors">
             Sobre Titan Forge
           </a>
-          <span className="text-zinc-300">|</span>
-          <a href="#reservas" className="hover:text-[#E50914] transition-colors">
-            Contacto
-          </a>
         </div>
       </div>
     </section>

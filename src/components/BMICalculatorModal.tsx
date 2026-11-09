@@ -72,18 +72,18 @@ export const BMICalculatorModal: React.FC<BMICalculatorModalProps> = ({
 
     // Determine level according to user's activity and history
     let recommendedLevel: 'principiante' | 'intermedio' | 'avanzado' = 'intermedio';
-    let levelTitle = 'Intermedio';
+    let levelTitle = 'Performance';
     let weeklySessions = 4;
     let recommendedRoutine = 'Rutina Torso / Pierna con progresión de cargas lineales (4 días)';
 
     if (activityLevel === 'sedentario' || activityLevel === 'ligero') {
       recommendedLevel = 'principiante';
-      levelTitle = 'Principiante';
+      levelTitle = 'Fundation';
       weeklySessions = 3;
       recommendedRoutine = 'Rutina Full-Body 3 días x semana con enfoque en biomecánica y técnica';
     } else if (activityLevel === 'intenso') {
       recommendedLevel = 'avanzado';
-      levelTitle = 'Avanzado';
+      levelTitle = 'Elite';
       weeklySessions = 5;
       recommendedRoutine = 'Periodización Ondulante Push-Pull-Legs con alta intensidad y RIR estricto';
     }
