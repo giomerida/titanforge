@@ -32,7 +32,7 @@ export const SERVICES_DATA: ServiceItem[] = [
     category: 'Plan Fundation',
     durationMinutes: 60,
     price: '$35 USD',
-    description: 'Enfocado en dominar los patrones motores fundamentales (sentadilla, bisagra de cadera, empuje y tracción) con técnica rigurosa y sin riesgo articular.',
+    description: 'Objetivo: desarrollar fuerza, potencia, resistencia anaeróbica y capacidad de trabajo mediante un estímulo híbrido de fuerza y acondicionamiento metabólico.',
     features: [
       'Evaluación biomecánica inicial y movilidad articular',
       'Rutina Full-Body 3 días x semana con sobrecarga adaptativa',
