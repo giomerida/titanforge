@@ -93,6 +93,7 @@ export default function App() {
         isLoggingIn={isLoggingIn}
         onScrollToBooking={scrollToBooking}
         onOpenCalculator={scrollToCalculator}
+        trainerEmail={TRAINER_EMAIL}
       />
 
       {/* Main Content Sections strictly reflecting the shared PDF Design */}
