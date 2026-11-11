@@ -28,6 +28,7 @@ interface EnrollmentSectionProps {
   onPlanChange: (plan: EnrollmentPlanInfo) => void;
   user: User | null;
   onSuccessSchedule: () => void;
+  onNavigateToPortal?: () => void;
   onBackToHome?: () => void;
 }
 
@@ -91,6 +92,7 @@ export const EnrollmentSection: React.FC<EnrollmentSectionProps> = ({
   onPlanChange,
   user,
   onSuccessSchedule,
+  onNavigateToPortal,
   onBackToHome,
 }) => {
   // Determine active plan (defaulting to Performance if none provided)
@@ -730,16 +732,27 @@ export const EnrollmentSection: React.FC<EnrollmentSectionProps> = ({
               </div>
             </div>
 
-            {/* Action to Schedule First Session */}
+            {/* Action to Enter Portal or Schedule First Session */}
             <div className="space-y-3 max-w-md mx-auto pt-2">
+              {onNavigateToPortal && (
+                <button
+                  type="button"
+                  onClick={onNavigateToPortal}
+                  className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-[#E50914] to-[#b80710] hover:from-[#c90812] hover:to-[#96060c] text-white font-montserrat font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl shadow-red-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                >
+                  <span className="text-base">🏋️</span>
+                  <span>Acceder a Mi Portal del Atleta</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={onSuccessSchedule}
-                className="w-full py-4 px-6 rounded-xl bg-[#E50914] hover:bg-[#c90812] text-white font-montserrat font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl shadow-red-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                className="w-full py-3.5 px-6 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 font-montserrat font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
               >
-                <Calendar className="w-4 h-4" />
-                <span>Agendar Mi Primera Sesión Presencial</span>
-                <ArrowRight className="w-4 h-4" />
+                <Calendar className="w-4 h-4 text-[#E50914]" />
+                <span>Agendar Primera Sesión Presencial</span>
               </button>
 
               {onBackToHome && (

@@ -10,6 +10,7 @@ import { Contact } from './components/Contact';
 import { ReadyToStartCTA } from './components/ReadyToStartCTA';
 import { BMICalculatorModal } from './components/BMICalculatorModal';
 import { EnrollmentSection, EnrollmentPlanInfo } from './components/EnrollmentSection';
+import { AthletePortal } from './components/AthletePortal';
 import { SERVICES_DATA, ServiceItem } from './data/landingData';
 import { initAuth, googleSignIn, logout } from './lib/firebase';
 import { ShieldCheck } from 'lucide-react';
@@ -19,10 +20,11 @@ export default function App() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [selectedService, setSelectedService] = useState<ServiceItem>(SERVICES_DATA[1]); // Default to Intermedio
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<'landing' | 'inscripcion'>(() => {
-    return typeof window !== 'undefined' && window.location.hash === '#inscripcion'
-      ? 'inscripcion'
-      : 'landing';
+  const [currentView, setCurrentView] = useState<'landing' | 'inscripcion' | 'atleta'>(() => {
+    if (typeof window === 'undefined') return 'landing';
+    if (window.location.hash === '#atleta') return 'atleta';
+    if (window.location.hash === '#inscripcion') return 'inscripcion';
+    return 'landing';
   });
   const [enrollmentPlan, setEnrollmentPlan] = useState<EnrollmentPlanInfo | null>({
     level: 'intermedio',
@@ -35,7 +37,9 @@ export default function App() {
 
   useEffect(() => {
     const handleHashChange = () => {
-      if (window.location.hash === '#inscripcion') {
+      if (window.location.hash === '#atleta') {
+        setCurrentView('atleta');
+      } else if (window.location.hash === '#inscripcion') {
         setCurrentView('inscripcion');
       } else if (window.location.hash === '' || window.location.hash === '#' || window.location.hash === '#inicio') {
         setCurrentView('landing');
@@ -59,12 +63,19 @@ export default function App() {
     };
   }, []);
 
+  const handleNavigateToAthletePortal = () => {
+    setCurrentView('atleta');
+    window.location.hash = 'atleta';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleLogin = async () => {
     setIsLoggingIn(true);
     try {
       const result = await googleSignIn();
       if (result) {
         setUser(result.user);
+        handleNavigateToAthletePortal();
       }
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
@@ -77,6 +88,9 @@ export default function App() {
     try {
       await logout();
       setUser(null);
+      if (currentView === 'atleta') {
+        handleNavigateHome();
+      }
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
@@ -127,7 +141,7 @@ export default function App() {
   };
 
   const scrollToCalculator = () => {
-    if (currentView === 'inscripcion') {
+    if (currentView === 'inscripcion' || currentView === 'atleta') {
       setCurrentView('landing');
       window.location.hash = 'calculadora';
       setTimeout(() => {
@@ -151,7 +165,7 @@ export default function App() {
         onLogout={handleLogout}
         isLoggingIn={isLoggingIn}
         onScrollToBooking={() => {
-          if (currentView === 'inscripcion') {
+          if (currentView === 'inscripcion' || currentView === 'atleta') {
             setCurrentView('landing');
             setTimeout(() => scrollToBooking(), 100);
           } else {
@@ -164,6 +178,7 @@ export default function App() {
           window.location.hash = 'inscripcion';
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
+        onNavigateToAthletePortal={handleNavigateToAthletePortal}
         onNavigateHome={handleNavigateHome}
         currentView={currentView}
         trainerEmail={TRAINER_EMAIL}
@@ -171,13 +186,28 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1">
-        {currentView === 'inscripcion' ? (
+        {currentView === 'atleta' ? (
+          /* SECCIÓN INDEPENDIENTE: PORTAL DEL ATLETA */
+          <AthletePortal
+            user={user}
+            planInfo={enrollmentPlan}
+            onNavigateHome={handleNavigateHome}
+            onLogout={handleLogout}
+            onScrollToBooking={() => {
+              setCurrentView('landing');
+              window.location.hash = 'reservas';
+              setTimeout(() => scrollToBooking(), 120);
+            }}
+            trainerEmail={TRAINER_EMAIL}
+          />
+        ) : currentView === 'inscripcion' ? (
           /* SECCIÓN INDEPENDIENTE: PORTAL DE INSCRIPCIÓN OFICIAL */
           <EnrollmentSection
             currentPlan={enrollmentPlan}
             onPlanChange={(plan) => setEnrollmentPlan(plan)}
             user={user}
             onSuccessSchedule={handleEnrollmentSuccessSchedule}
+            onNavigateToPortal={handleNavigateToAthletePortal}
             onBackToHome={handleNavigateHome}
           />
         ) : (

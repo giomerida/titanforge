@@ -24,8 +24,9 @@ interface NavbarProps {
   onOpenCalculator: () => void;
   onScrollToBooking: () => void;
   onNavigateToEnrollment?: () => void;
+  onNavigateToAthletePortal?: () => void;
   onNavigateHome?: () => void;
-  currentView?: 'landing' | 'inscripcion';
+  currentView?: 'landing' | 'inscripcion' | 'atleta';
   trainerEmail?: string;
 }
 
@@ -37,6 +38,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenCalculator,
   onScrollToBooking,
   onNavigateToEnrollment,
+  onNavigateToAthletePortal,
   onNavigateHome,
   currentView = 'landing',
   trainerEmail,
@@ -95,6 +97,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       setIsProfileOpen(false);
       setLoginEmail('');
       setLoginPassword('');
+      onNavigateToAthletePortal?.();
     } catch (err: unknown) {
       console.error('Login error:', err);
       const code = (err as { code?: string })?.code || '';
@@ -233,10 +236,26 @@ export const Navbar: React.FC<NavbarProps> = ({
             Inscripción
           </button>
 
+          {/* Portal del Atleta button */}
+          <button
+            type="button"
+            onClick={() => onNavigateToAthletePortal?.()}
+            className={`${
+              currentView === 'atleta'
+                ? 'text-[#E50914] border-b-2 border-[#E50914] pb-0.5 font-bold'
+                : 'hover:text-[#E50914] text-zinc-700'
+            } transition-colors cursor-pointer font-semibold flex items-center gap-1.5`}
+          >
+            <span>Portal Atleta</span>
+            {user && (
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            )}
+          </button>
+
           <button
             type="button"
             onClick={() => {
-              if (currentView === 'inscripcion') {
+              if (currentView === 'inscripcion' || currentView === 'atleta') {
                 onNavigateHome?.();
                 setTimeout(() => {
                   document.getElementById('sobre-titan-forge')?.scrollIntoView({ behavior: 'smooth' });
@@ -334,7 +353,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </div>
 
                     {/* Quick navigation actions */}
-                    <div className="space-y-1 text-xs font-montserrat font-semibold text-zinc-700">
+                    <div className="space-y-1.5 text-xs font-montserrat font-semibold text-zinc-700">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsProfileOpen(false);
+                          onNavigateToAthletePortal?.();
+                        }}
+                        className="w-full py-2.5 px-3 rounded-xl bg-[#E50914] hover:bg-[#c90812] text-white text-xs font-montserrat font-black uppercase tracking-wider flex items-center justify-between shadow-md shadow-red-600/20 transition-all cursor-pointer active:scale-98"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">🏋️</span>
+                          <span>Mi Portal del Atleta</span>
+                        </div>
+                        <ChevronRight className="w-4 h-4 stroke-[3]" />
+                      </button>
+
                       <button
                         type="button"
                         onClick={() => {
