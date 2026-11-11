@@ -7,6 +7,7 @@ import eliteImg from '../../img/elite.png';
 
 interface ProgramStepSectionProps {
   onSelectPlanAndBook: (service: ServiceItem) => void;
+  onEnrollPlan?: (plan: { level: 'principiante' | 'intermedio' | 'avanzado'; planName: string; price: string }) => void;
   services: ServiceItem[];
 }
 
@@ -109,6 +110,7 @@ const PLAN_WORKOUT_DETAILS: Record<string, PlanWorkoutDetail> = {
 
 export const ProgramStepSection: React.FC<ProgramStepSectionProps> = ({
   onSelectPlanAndBook,
+  onEnrollPlan,
   services,
 }) => {
   const [activePlanModal, setActivePlanModal] = useState<ServiceItem | null>(null);
@@ -307,8 +309,23 @@ export const ProgramStepSection: React.FC<ProgramStepSectionProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  onSelectPlanAndBook(activePlanModal);
+                  const targetPlan = activePlanModal;
                   setActivePlanModal(null);
+                  if (onEnrollPlan) {
+                    const planName =
+                      targetPlan.levelKey === 'principiante'
+                        ? 'Fundation'
+                        : targetPlan.levelKey === 'intermedio'
+                        ? 'Performance'
+                        : 'Elite';
+                    onEnrollPlan({
+                      level: targetPlan.levelKey,
+                      planName,
+                      price: targetPlan.price,
+                    });
+                  } else {
+                    onSelectPlanAndBook(targetPlan);
+                  }
                 }}
                 className="flex-1 py-3 px-4 rounded-md bg-[#E50914] hover:bg-[#c90812] text-white text-xs font-black uppercase tracking-wider font-montserrat flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer"
               >

@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { User } from 'firebase/auth';
-import { LogOut, User as UserIcon, Shield, ChevronRight, Lock } from 'lucide-react';
+import {
+  LogOut,
+  User as UserIcon,
+  Shield,
+  ChevronRight,
+  Lock,
+  Mail,
+  Eye,
+  EyeOff,
+  AlertCircle,
+} from 'lucide-react';
+import { emailPasswordSignIn } from '../lib/firebase';
 
 import logoTitanBlack from '../../img/logo titan black.png';
 import logoTitanForge from '../../img/logo titan forge.png';
@@ -12,6 +23,9 @@ interface NavbarProps {
   isLoggingIn: boolean;
   onOpenCalculator: () => void;
   onScrollToBooking: () => void;
+  onNavigateToEnrollment?: () => void;
+  onNavigateHome?: () => void;
+  currentView?: 'landing' | 'inscripcion';
   trainerEmail?: string;
 }
 
@@ -22,11 +36,21 @@ export const Navbar: React.FC<NavbarProps> = ({
   isLoggingIn,
   onOpenCalculator,
   onScrollToBooking,
+  onNavigateToEnrollment,
+  onNavigateHome,
+  currentView = 'landing',
   trainerEmail,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  // Email & Password login state
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [isEmailLoggingIn, setIsEmailLoggingIn] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -58,15 +82,55 @@ export const Navbar: React.FC<NavbarProps> = ({
     };
   }, [isProfileOpen]);
 
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+    if (!loginEmail || !loginPassword) {
+      setLoginError('Por favor completa todos los campos.');
+      return;
+    }
+    setIsEmailLoggingIn(true);
+    try {
+      await emailPasswordSignIn(loginEmail, loginPassword);
+      setIsProfileOpen(false);
+      setLoginEmail('');
+      setLoginPassword('');
+    } catch (err: unknown) {
+      console.error('Login error:', err);
+      const code = (err as { code?: string })?.code || '';
+      if (code === 'auth/user-not-found') {
+        setLoginError('No existe una cuenta registrada con este correo.');
+      } else if (
+        code === 'auth/wrong-password' ||
+        code === 'auth/invalid-credential' ||
+        code === 'auth/invalid-login-credentials'
+      ) {
+        setLoginError('Correo o contraseña incorrectos.');
+      } else if (code === 'auth/invalid-email') {
+        setLoginError('Ingresa un correo electrónico válido.');
+      } else if (code === 'auth/too-many-requests') {
+        setLoginError('Demasiados intentos fallidos. Intenta más tarde.');
+      } else {
+        setLoginError('Error al iniciar sesión. Verifica tus credenciales.');
+      }
+    } finally {
+      setIsEmailLoggingIn(false);
+    }
+  };
+
   return (
     <header className="sticky top-0 w-full bg-[#ffffff] border-b border-zinc-200 z-50 transition-shadow duration-300 shadow-xs">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-18 sm:h-20 flex items-center justify-between relative">
         {/* Left: Logo Container */}
         <div className="relative flex items-center min-w-[120px] sm:min-w-[150px] h-full">
           {/* Logo actual en el menú (logo titan black.png): Oculto arriba, visible al bajar */}
-          <a
-            href="#"
-            className={`flex items-center py-1 transition-all duration-300 ease-in-out ${
+          <button
+            type="button"
+            onClick={() => {
+              if (currentView === 'inscripcion') onNavigateHome?.();
+              else window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`flex items-center py-1 transition-all duration-300 ease-in-out cursor-pointer ${
               isScrolled
                 ? 'opacity-100 scale-100 pointer-events-auto translate-y-0'
                 : 'opacity-0 scale-90 pointer-events-none -translate-y-2'
@@ -78,7 +142,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               alt="Titan Forge Logo"
               className="h-14 sm:h-16 w-auto object-contain transition-transform duration-200 hover:scale-105"
             />
-          </a>
+          </button>
 
           {/* Logo flotante (logo titan forge.png): tamaño ajustado para visibilidad completa entre menú y header */}
           <div
@@ -88,44 +152,103 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : 'opacity-0 scale-75 pointer-events-none -translate-y-3/4'
             }`}
           >
-            <a href="#" aria-label="Titan Forge Inicio" className="block group">
+            <button
+              type="button"
+              onClick={() => {
+                if (currentView === 'inscripcion') onNavigateHome?.();
+                else window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              aria-label="Titan Forge Inicio"
+              className="block group cursor-pointer"
+            >
               <img
                 src={logoTitanForge}
                 alt="Titan Forge Logo Flotante"
                 className="h-28 sm:h-32 md:h-36 w-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.65)] group-hover:scale-105 transition-transform duration-300"
               />
-            </a>
+            </button>
           </div>
         </div>
 
-        {/* Center Navigation Menu: Inicio | Entrenamiento | Calculadora | Sobre Titan Forge */}
+        {/* Center Navigation Menu: Inicio | Entrenamiento | Calculadora | Inscripción | Sobre Titan Forge */}
         <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-[13px] font-montserrat font-semibold text-[#1a1a1a]">
-          <a
-            href="#"
-            className="text-[#E50914] border-b-2 border-[#E50914] pb-0.5 font-bold transition-colors"
+          <button
+            type="button"
+            onClick={() => {
+              if (currentView === 'inscripcion') onNavigateHome?.();
+              else window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`${
+              currentView === 'landing'
+                ? 'text-[#E50914] border-b-2 border-[#E50914] pb-0.5 font-bold'
+                : 'hover:text-[#E50914] text-zinc-700'
+            } transition-colors cursor-pointer`}
           >
             Inicio
-          </a>
-          <a
-            href="#entrenamiento"
-            className="hover:text-[#E50914] transition-colors"
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (currentView === 'inscripcion') {
+                onNavigateHome?.();
+                setTimeout(() => {
+                  document.getElementById('entrenamiento')?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+              } else {
+                document.getElementById('entrenamiento')?.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className="hover:text-[#E50914] text-zinc-700 transition-colors cursor-pointer font-semibold"
           >
             Entrenamiento
-          </a>
+          </button>
+
           {/* Calculadora triggers scroll to calculator */}
           <button
             type="button"
-            onClick={onOpenCalculator}
-            className="hover:text-[#E50914] transition-colors font-semibold cursor-pointer"
+            onClick={() => {
+              if (currentView === 'inscripcion') {
+                onNavigateHome?.();
+                setTimeout(() => onOpenCalculator(), 100);
+              } else {
+                onOpenCalculator();
+              }
+            }}
+            className="hover:text-[#E50914] text-zinc-700 transition-colors font-semibold cursor-pointer"
           >
             Calculadora
           </button>
-          <a
-            href="#sobre-titan-forge"
-            className="hover:text-[#E50914] transition-colors"
+
+          {/* Independent Portal: Inscripción Oficial */}
+          <button
+            type="button"
+            onClick={() => onNavigateToEnrollment?.()}
+            className={`${
+              currentView === 'inscripcion'
+                ? 'text-[#E50914] border-b-2 border-[#E50914] pb-0.5 font-bold'
+                : 'hover:text-[#E50914] text-zinc-700'
+            } transition-colors cursor-pointer font-semibold`}
+          >
+            Inscripción
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (currentView === 'inscripcion') {
+                onNavigateHome?.();
+                setTimeout(() => {
+                  document.getElementById('sobre-titan-forge')?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+              } else {
+                document.getElementById('sobre-titan-forge')?.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className="hover:text-[#E50914] text-zinc-700 transition-colors cursor-pointer font-semibold"
           >
             Sobre Titan Forge
-          </a>
+          </button>
         </nav>
 
         {/* Right CTA Button: Comienza ahora + Icono de Perfil para Usuarios y Administrador */}
@@ -175,7 +298,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Profile & Login Dropdown Panel */}
             {isProfileOpen && (
-              <div className="absolute right-0 mt-2.5 w-80 bg-white rounded-2xl shadow-2xl border border-zinc-200/90 z-50 p-4 text-zinc-900 animate-fadeIn">
+              <div className="absolute right-0 mt-2.5 w-84 sm:w-88 bg-white rounded-2xl shadow-2xl border border-zinc-200/90 z-50 p-4 sm:p-5 text-zinc-900 animate-fadeIn">
                 {user ? (
                   /* Logged-in Profile View */
                   <div className="space-y-3.5">
@@ -251,10 +374,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </div>
                   </div>
                 ) : (
-                  /* Not Logged In - Login Panel */
-                  <div className="space-y-4">
-                    <div className="text-center pb-2 border-b border-zinc-100">
-                      <div className="w-10 h-10 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-800 mx-auto flex items-center justify-center mb-2">
+                  /* Not Logged In - Email & Password + Google Login Panel */
+                  <div className="space-y-3.5">
+                    <div className="text-center pb-2.5 border-b border-zinc-100">
+                      <div className="w-10 h-10 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-800 mx-auto flex items-center justify-center mb-1.5 shadow-2xs">
                         <Lock className="w-5 h-5 text-[#E50914]" />
                       </div>
                       <h4 className="font-montserrat font-black text-sm text-zinc-900 uppercase">
@@ -263,6 +386,85 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <p className="text-[11px] text-zinc-500 mt-0.5">
                         Exclusivo para personas con planes y administración
                       </p>
+                    </div>
+
+                    {/* Email and Password Login Form */}
+                    <form onSubmit={handleEmailSubmit} className="space-y-2.5">
+                      <div>
+                        <label className="block text-[10px] font-montserrat font-bold text-zinc-700 uppercase tracking-wider mb-1">
+                          Correo electrónico
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="email"
+                            required
+                            value={loginEmail}
+                            onChange={(e) => {
+                              setLoginEmail(e.target.value);
+                              if (loginError) setLoginError(null);
+                            }}
+                            placeholder="atleta@ejemplo.com"
+                            className="w-full bg-zinc-50 border border-zinc-200 rounded-xl pl-9 pr-3 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[#E50914] focus:bg-white transition-colors"
+                          />
+                          <Mail className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5 pointer-events-none" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-montserrat font-bold text-zinc-700 uppercase tracking-wider mb-1">
+                          Contraseña
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={showPassword ? 'text' : 'password'}
+                            required
+                            value={loginPassword}
+                            onChange={(e) => {
+                              setLoginPassword(e.target.value);
+                              if (loginError) setLoginError(null);
+                            }}
+                            placeholder="••••••••"
+                            className="w-full bg-zinc-50 border border-zinc-200 rounded-xl pl-9 pr-9 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[#E50914] focus:bg-white transition-colors"
+                          />
+                          <Lock className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5 pointer-events-none" />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-2.5 text-zinc-400 hover:text-zinc-700 cursor-pointer"
+                            tabIndex={-1}
+                            title={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="w-4 h-4" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {loginError && (
+                        <div className="flex items-center gap-1.5 p-2 rounded-lg bg-red-50 border border-red-200 text-red-700 text-[11px] animate-fadeIn">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{loginError}</span>
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={isEmailLoggingIn}
+                        className="w-full py-2.5 px-4 rounded-xl bg-[#E50914] hover:bg-[#c90812] text-white font-montserrat font-bold text-xs uppercase tracking-wider shadow-sm transition-all active:scale-98 cursor-pointer disabled:opacity-50 mt-1"
+                      >
+                        {isEmailLoggingIn ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                      </button>
+                    </form>
+
+                    {/* Divider */}
+                    <div className="relative flex items-center justify-center py-1">
+                      <div className="border-t border-zinc-200 w-full" />
+                      <span className="bg-white px-2 text-[10px] font-montserrat font-bold uppercase text-zinc-400 tracking-wider absolute">
+                        O continúa con
+                      </span>
                     </div>
 
                     {/* Google OAuth Login Button */}
@@ -274,7 +476,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           await onLogin();
                           setIsProfileOpen(false);
                         }}
-                        className="w-full flex items-center justify-center gap-3 bg-white hover:bg-zinc-50 text-zinc-800 font-montserrat font-bold text-xs py-3 px-4 rounded-xl border border-zinc-300 shadow-sm transition-all hover:border-zinc-400 active:scale-98 cursor-pointer disabled:opacity-50"
+                        className="w-full flex items-center justify-center gap-2.5 bg-white hover:bg-zinc-50 text-zinc-800 font-montserrat font-bold text-xs py-2.5 px-4 rounded-xl border border-zinc-300 shadow-2xs transition-all hover:border-zinc-400 active:scale-98 cursor-pointer disabled:opacity-50"
                       >
                         {/* Official Google SVG icon */}
                         <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -299,7 +501,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </button>
                     </div>
 
-                    <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/25 text-[11px] text-zinc-700 space-y-1">
+                    {/* Exclusivity Notice & Shortcut to Enrollment */}
+                    <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/25 text-[11px] text-zinc-700 space-y-1.5">
                       <div className="font-bold text-amber-950 flex items-center gap-1.5">
                         <Lock className="w-3.5 h-3.5 text-[#E50914]" />
                         <span>Acceso Exclusivo:</span>
@@ -307,6 +510,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <p className="leading-relaxed text-zinc-600">
                         Acceso reservado únicamente para atletas con un <strong className="text-zinc-900">plan activo</strong> (Fundation, Performance o Elite) y administración.
                       </p>
+                      <div className="pt-1 text-center border-t border-amber-500/20">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsProfileOpen(false);
+                            onNavigateToEnrollment?.();
+                          }}
+                          className="text-[#E50914] hover:underline font-bold text-[11px] cursor-pointer inline-flex items-center gap-1"
+                        >
+                          <span>¿No tienes un plan activo? Inscríbete aquí</span>
+                          <span>↗</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}

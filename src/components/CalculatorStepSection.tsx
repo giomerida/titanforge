@@ -6,6 +6,7 @@ import fondoPaso1 from '../../img/fondo_paso1.png';
 interface CalculatorStepSectionProps {
   onSelectPlanAndBook?: (level: 'principiante' | 'intermedio' | 'avanzado') => void;
   onOpenCalculator?: () => void;
+  onEnrollPlan?: (plan: { level: 'principiante' | 'intermedio' | 'avanzado'; planName: string; price: string }) => void;
 }
 
 export interface Step1BMIResult {
@@ -22,6 +23,7 @@ export interface Step1BMIResult {
 
 export const CalculatorStepSection: React.FC<CalculatorStepSectionProps> = ({
   onSelectPlanAndBook,
+  onEnrollPlan,
 }) => {
   const [gender, setGender] = useState<'hombre' | 'mujer'>('hombre');
   const [age, setAge] = useState<number | ''>(26);
@@ -123,7 +125,30 @@ export const CalculatorStepSection: React.FC<CalculatorStepSectionProps> = ({
   };
 
   const handleBookPlan = () => {
-    if (result && onSelectPlanAndBook) {
+    if (!result) return;
+
+    const planPrices: Record<string, string> = {
+      principiante: '$35 USD',
+      intermedio: '$45 USD',
+      avanzado: '$55 USD',
+    };
+    const formattedPlanName =
+      result.planName === 'FUNDATION'
+        ? 'Fundation'
+        : result.planName === 'PERFORMANCE'
+        ? 'Performance'
+        : 'Elite';
+
+    if (onEnrollPlan) {
+      onEnrollPlan({
+        level: result.recommendedLevel,
+        planName: formattedPlanName,
+        price: planPrices[result.recommendedLevel] || '$45 USD',
+      });
+      return;
+    }
+
+    if (onSelectPlanAndBook) {
       onSelectPlanAndBook(result.recommendedLevel);
     } else {
       // Fallback scroll to booking section
@@ -419,7 +444,15 @@ export const CalculatorStepSection: React.FC<CalculatorStepSectionProps> = ({
                       onClick={handleBookPlan}
                       className="w-full sm:flex-1 bg-white hover:bg-zinc-100 text-black font-montserrat font-black text-xs sm:text-sm uppercase py-3 px-4 rounded-md shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      <span>AGENDAR {result.planName} ↗</span>
+                      <span>
+                        Inscribirme a{' '}
+                        {result.planName === 'FUNDATION'
+                          ? 'Fundation'
+                          : result.planName === 'PERFORMANCE'
+                          ? 'Performance'
+                          : 'Elite'}{' '}
+                        ↗
+                      </span>
                     </button>
 
                     <button

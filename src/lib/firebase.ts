@@ -5,6 +5,9 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged,
   signOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
   User,
 } from 'firebase/auth';
 import firebaseConfig from '../../firebase-applet-config.json';
@@ -37,18 +40,42 @@ export const initAuth = (
 ) => {
   return onAuthStateChanged(auth, async (user: User | null) => {
     if (user) {
-      if (cachedAccessToken) {
-        if (onAuthSuccess) onAuthSuccess(user, cachedAccessToken);
-      } else if (!isSigningIn) {
-        // If user is logged in to Firebase but token is cleared (e.g. reload),
-        // we keep the user state and can prompt for token or reconnect if needed.
-        if (onAuthFailure) onAuthFailure();
-      }
+      if (onAuthSuccess) onAuthSuccess(user, cachedAccessToken || '');
     } else {
       cachedAccessToken = null;
       if (onAuthFailure) onAuthFailure();
     }
   });
+};
+
+/**
+ * Sign in with email and password
+ */
+export const emailPasswordSignIn = async (
+  email: string,
+  pass: string
+): Promise<User> => {
+  const credential = await signInWithEmailAndPassword(auth, email.trim(), pass);
+  return credential.user;
+};
+
+/**
+ * Register with email and password
+ */
+export const registerWithEmailPassword = async (
+  email: string,
+  pass: string,
+  displayName?: string
+): Promise<User> => {
+  const credential = await createUserWithEmailAndPassword(auth, email.trim(), pass);
+  if (displayName && credential.user) {
+    try {
+      await updateProfile(credential.user, { displayName });
+    } catch {
+      // Ignored
+    }
+  }
+  return credential.user;
 };
 
 /**

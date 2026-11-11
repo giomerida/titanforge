@@ -9,6 +9,7 @@ import { BookingSection } from './components/BookingSection';
 import { Contact } from './components/Contact';
 import { ReadyToStartCTA } from './components/ReadyToStartCTA';
 import { BMICalculatorModal } from './components/BMICalculatorModal';
+import { EnrollmentSection, EnrollmentPlanInfo } from './components/EnrollmentSection';
 import { SERVICES_DATA, ServiceItem } from './data/landingData';
 import { initAuth, googleSignIn, logout } from './lib/firebase';
 import { ShieldCheck } from 'lucide-react';
@@ -18,9 +19,31 @@ export default function App() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [selectedService, setSelectedService] = useState<ServiceItem>(SERVICES_DATA[1]); // Default to Intermedio
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<'landing' | 'inscripcion'>(() => {
+    return typeof window !== 'undefined' && window.location.hash === '#inscripcion'
+      ? 'inscripcion'
+      : 'landing';
+  });
+  const [enrollmentPlan, setEnrollmentPlan] = useState<EnrollmentPlanInfo | null>({
+    level: 'intermedio',
+    planName: 'Performance',
+    price: '$45 USD',
+  });
 
   // Trainer's email account for notifications & calendars
   const TRAINER_EMAIL = 'amauryuchiha@gmail.com';
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#inscripcion') {
+        setCurrentView('inscripcion');
+      } else if (window.location.hash === '' || window.location.hash === '#' || window.location.hash === '#inicio') {
+        setCurrentView('landing');
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = initAuth(
@@ -76,7 +99,43 @@ export default function App() {
     scrollToBooking();
   };
 
+  const handleOpenEnrollment = (plan: EnrollmentPlanInfo) => {
+    setEnrollmentPlan(plan);
+    setCurrentView('inscripcion');
+    window.location.hash = 'inscripcion';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigateHome = () => {
+    setCurrentView('landing');
+    window.location.hash = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleEnrollmentSuccessSchedule = () => {
+    if (enrollmentPlan) {
+      const matched =
+        SERVICES_DATA.find((s) => s.levelKey === enrollmentPlan.level) ||
+        SERVICES_DATA[1];
+      setSelectedService(matched);
+    }
+    setCurrentView('landing');
+    window.location.hash = 'reservas';
+    setTimeout(() => {
+      scrollToBooking();
+    }, 120);
+  };
+
   const scrollToCalculator = () => {
+    if (currentView === 'inscripcion') {
+      setCurrentView('landing');
+      window.location.hash = 'calculadora';
+      setTimeout(() => {
+        const el = document.getElementById('calculadora');
+        el?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      return;
+    }
     const el = document.getElementById('calculadora');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
@@ -91,53 +150,80 @@ export default function App() {
         onLogin={handleLogin}
         onLogout={handleLogout}
         isLoggingIn={isLoggingIn}
-        onScrollToBooking={scrollToBooking}
+        onScrollToBooking={() => {
+          if (currentView === 'inscripcion') {
+            setCurrentView('landing');
+            setTimeout(() => scrollToBooking(), 100);
+          } else {
+            scrollToBooking();
+          }
+        }}
         onOpenCalculator={scrollToCalculator}
+        onNavigateToEnrollment={() => {
+          setCurrentView('inscripcion');
+          window.location.hash = 'inscripcion';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        onNavigateHome={handleNavigateHome}
+        currentView={currentView}
         trainerEmail={TRAINER_EMAIL}
       />
 
-      {/* Main Content Sections strictly reflecting the shared PDF Design */}
+      {/* Main Content Area */}
       <main className="flex-1">
-        {/* 1. HERO: "ENTRENAMIENTO PERSONALIZADO A TU MEDIDA" */}
-        <Hero
-          onOpenCalculator={scrollToCalculator}
-          onScrollToBooking={scrollToBooking}
-        />
+        {currentView === 'inscripcion' ? (
+          /* SECCIÓN INDEPENDIENTE: PORTAL DE INSCRIPCIÓN OFICIAL */
+          <EnrollmentSection
+            currentPlan={enrollmentPlan}
+            onPlanChange={(plan) => setEnrollmentPlan(plan)}
+            user={user}
+            onSuccessSchedule={handleEnrollmentSuccessSchedule}
+            onBackToHome={handleNavigateHome}
+          />
+        ) : (
+          /* VISTA PRINCIPAL: LANDING COMPLETA */
+          <>
+            {/* 1. HERO: "ENTRENAMIENTO PERSONALIZADO A TU MEDIDA" */}
+            <Hero
+              onOpenCalculator={scrollToCalculator}
+              onScrollToBooking={scrollToBooking}
+            />
 
-        {/* Separador: Barra negra 5 veces más grande y sin contornos */}
-        <div className="w-full h-16 sm:h-20 bg-black" />
+            {/* Separador: Barra negra 5 veces más grande y sin contornos */}
+            <div className="w-full h-16 sm:h-20 bg-black" />
 
-        {/* 2. PASO 1: "USA NUESTRA CALCULADORA" + Calculadora Interactiva en bloque rojo */}
-        <CalculatorStepSection
-          onSelectPlanAndBook={handleSelectPlanAndBook}
-          onOpenCalculator={scrollToCalculator}
-        />
+            {/* 2. PASO 1: "USA NUESTRA CALCULADORA" + Calculadora Interactiva en bloque rojo */}
+            <CalculatorStepSection
+              onSelectPlanAndBook={handleSelectPlanAndBook}
+              onEnrollPlan={handleOpenEnrollment}
+              onOpenCalculator={scrollToCalculator}
+            />
 
-        {/* 3. PASO 2: "RECIBE TU PROGRAMA" - FUNDATION, PERFORMANCE, ELITE with VER PLAN popup */}
-        <ProgramStepSection
-          services={SERVICES_DATA}
-          onSelectPlanAndBook={handleSelectPlanAndBook}
-        />
+            {/* 3. PASO 2: "RECIBE TU PROGRAMA" - FUNDATION, PERFORMANCE, ELITE with VER PLAN popup */}
+            <ProgramStepSection
+              services={SERVICES_DATA}
+              onSelectPlanAndBook={handleSelectPlanAndBook}
+              onEnrollPlan={handleOpenEnrollment}
+            />
 
-        {/* 4. ¿POR QUÉ ELEGIR A TITAN FORGE? + "MÁS QUE UN ENTRENAMIENTO ES FORJAR EL CARÁCTER" */}
-        <WhyTitanForge />
+            {/* 4. ¿POR QUÉ ELEGIR A TITAN FORGE? + "MÁS QUE UN ENTRENAMIENTO ES FORJAR EL CARÁCTER" */}
+            <WhyTitanForge />
 
-        {/* 5. Agendamiento Online con Google Calendar y Gmail (Sesión personalizada) */}
-        <BookingSection
-          user={user}
-          onLogin={handleLogin}
-          selectedService={selectedService}
-          onServiceChange={setSelectedService}
-          trainerEmail={TRAINER_EMAIL}
-        />
+            {/* 5. Agendamiento Online con Google Calendar y Gmail (Sesión personalizada) */}
+            <BookingSection
+              user={user}
+              onLogin={handleLogin}
+              selectedService={selectedService}
+              onServiceChange={setSelectedService}
+              trainerEmail={TRAINER_EMAIL}
+            />
 
-        {/* 6. Formulario de Contacto (Oculto) */}
-        {/* <Contact /> */}
-
-        {/* 8. White Banner Footer: "¿LISTO PARA EMPEZAR? Tu objetivo esta a un clic de distancia" */}
-        <ReadyToStartCTA
-          onOpenCalculator={scrollToCalculator}
-        />
+            {/* 6. Banner Final CTA: "¿LISTO PARA EMPEZAR?" */}
+            <ReadyToStartCTA
+              onOpenCalculator={scrollToCalculator}
+            />
+          </>
+        )}
       </main>
 
       {/* Bottom Technical Bar */}
