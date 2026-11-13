@@ -10,6 +10,8 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
+  Menu,
+  X,
 } from 'lucide-react';
 import { emailPasswordSignIn } from '../lib/firebase';
 
@@ -45,6 +47,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileLoginOpen, setIsMobileLoginOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
   // Email & Password login state
@@ -95,6 +99,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     try {
       await emailPasswordSignIn(loginEmail, loginPassword);
       setIsProfileOpen(false);
+      setIsMobileMenuOpen(false);
+      setIsMobileLoginOpen(false);
       setLoginEmail('');
       setLoginPassword('');
       onNavigateToAthletePortal?.();
@@ -130,7 +136,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => {
-              if (currentView === 'inscripcion') onNavigateHome?.();
+              if (currentView === 'inscripcion' || currentView === 'atleta') onNavigateHome?.();
               else window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             className={`flex items-center py-1 transition-all duration-300 ease-in-out cursor-pointer ${
@@ -158,7 +164,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => {
-                if (currentView === 'inscripcion') onNavigateHome?.();
+                if (currentView === 'inscripcion' || currentView === 'atleta') onNavigateHome?.();
                 else window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               aria-label="Titan Forge Inicio"
@@ -174,11 +180,11 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Center Navigation Menu: Inicio | Entrenamiento | Calculadora | Inscripción | Sobre Titan Forge */}
-        <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-[13px] font-montserrat font-semibold text-[#1a1a1a]">
+        <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-[13px] font-montserrat font-semibold text-[#1a1a1a]">
           <button
             type="button"
             onClick={() => {
-              if (currentView === 'inscripcion') onNavigateHome?.();
+              if (currentView === 'inscripcion' || currentView === 'atleta') onNavigateHome?.();
               else window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             className={`${
@@ -193,7 +199,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => {
-              if (currentView === 'inscripcion') {
+              if (currentView === 'inscripcion' || currentView === 'atleta') {
                 onNavigateHome?.();
                 setTimeout(() => {
                   document.getElementById('entrenamiento')?.scrollIntoView({ behavior: 'smooth' });
@@ -211,7 +217,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => {
-              if (currentView === 'inscripcion') {
+              if (currentView === 'inscripcion' || currentView === 'atleta') {
                 onNavigateHome?.();
                 setTimeout(() => onOpenCalculator(), 100);
               } else {
@@ -270,20 +276,42 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         </nav>
 
-        {/* Right CTA Button: Comienza ahora + Icono de Perfil para Usuarios y Administrador */}
+        {/* Right CTA Button: Comienza ahora (hidden on mobile & tablet) + Desktop Profile Icon + Mobile/Tablet Hamburger */}
         <div className="flex items-center gap-2.5 sm:gap-3">
-          {/* Red Pill Button exactly as top right of PDF */}
+          {/* Red Pill Button (Desktop only) */}
           <button
             type="button"
             onClick={onScrollToBooking}
-            className="bg-[#E50914] hover:bg-[#c90812] text-white font-montserrat font-bold text-xs sm:text-[13px] px-4 sm:px-5 py-2.5 rounded-md transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 shrink-0"
+            className="hidden lg:flex bg-[#E50914] hover:bg-[#c90812] text-white font-montserrat font-bold text-xs sm:text-[13px] px-4 sm:px-5 py-2.5 rounded-md transition-all shadow-sm items-center gap-1.5 cursor-pointer active:scale-95 shrink-0"
           >
             <span>Comienza ahora</span>
             <span className="font-black text-sm">↗</span>
           </button>
 
-          {/* Profile Icon for Users & Administrator */}
-          <div className="relative" ref={profileRef}>
+          {/* Mobile & Tablet Hamburger Button */}
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className={`lg:hidden w-10 h-10 rounded-xl border transition-all flex items-center justify-center relative cursor-pointer ${
+              isMobileMenuOpen
+                ? 'border-[#E50914] bg-red-50 text-[#E50914]'
+                : 'border-zinc-300 bg-white text-zinc-800 hover:border-black'
+            }`}
+            aria-label={isMobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={isMobileMenuOpen}
+          >
+            {isMobileMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
+            {user && !isMobileMenuOpen && (
+              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full" />
+            )}
+          </button>
+
+          {/* Desktop Profile Icon for Users & Administrator */}
+          <div className="relative hidden lg:block" ref={profileRef}>
             <button
               type="button"
               onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -565,6 +593,360 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Mobile & Tablet Hamburger Menu Drawer */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden bg-white border-t border-zinc-200 shadow-2xl max-h-[calc(100vh-4.5rem)] overflow-y-auto animate-fadeIn">
+          <div className="px-4 py-4 space-y-4">
+            {/* Navigation Options */}
+            <nav className="flex flex-col space-y-1 text-sm font-montserrat font-semibold text-zinc-800">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  if (currentView === 'inscripcion' || currentView === 'atleta') onNavigateHome?.();
+                  else window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className={`w-full text-left px-3.5 py-2.5 rounded-xl transition-colors cursor-pointer flex items-center justify-between ${
+                  currentView === 'landing'
+                    ? 'bg-red-50 text-[#E50914] font-bold'
+                    : 'hover:bg-zinc-100 text-zinc-800'
+                }`}
+              >
+                <span>Inicio</span>
+                <ChevronRight className="w-4 h-4 opacity-50" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  if (currentView === 'inscripcion' || currentView === 'atleta') {
+                    onNavigateHome?.();
+                    setTimeout(() => {
+                      document.getElementById('entrenamiento')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  } else {
+                    document.getElementById('entrenamiento')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-zinc-100 text-zinc-800 transition-colors cursor-pointer flex items-center justify-between"
+              >
+                <span>Entrenamiento</span>
+                <ChevronRight className="w-4 h-4 opacity-50" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  if (currentView === 'inscripcion' || currentView === 'atleta') {
+                    onNavigateHome?.();
+                    setTimeout(() => onOpenCalculator(), 100);
+                  } else {
+                    onOpenCalculator();
+                  }
+                }}
+                className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-zinc-100 text-zinc-800 transition-colors cursor-pointer flex items-center justify-between"
+              >
+                <span>Calculadora</span>
+                <ChevronRight className="w-4 h-4 opacity-50" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onNavigateToEnrollment?.();
+                }}
+                className={`w-full text-left px-3.5 py-2.5 rounded-xl transition-colors cursor-pointer flex items-center justify-between ${
+                  currentView === 'inscripcion'
+                    ? 'bg-red-50 text-[#E50914] font-bold'
+                    : 'hover:bg-zinc-100 text-zinc-800'
+                }`}
+              >
+                <span>Inscripción</span>
+                <ChevronRight className="w-4 h-4 opacity-50" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onNavigateToAthletePortal?.();
+                }}
+                className={`w-full text-left px-3.5 py-2.5 rounded-xl transition-colors cursor-pointer flex items-center justify-between ${
+                  currentView === 'atleta'
+                    ? 'bg-red-50 text-[#E50914] font-bold'
+                    : 'hover:bg-zinc-100 text-zinc-800'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <span>Portal Atleta</span>
+                  {user && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
+                </span>
+                <ChevronRight className="w-4 h-4 opacity-50" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  if (currentView === 'inscripcion' || currentView === 'atleta') {
+                    onNavigateHome?.();
+                    setTimeout(() => {
+                      document.getElementById('sobre-titan-forge')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  } else {
+                    document.getElementById('sobre-titan-forge')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-zinc-100 text-zinc-800 transition-colors cursor-pointer flex items-center justify-between"
+              >
+                <span>Sobre Titan Forge</span>
+                <ChevronRight className="w-4 h-4 opacity-50" />
+              </button>
+            </nav>
+
+            {/* Login / User Profile Section inside Mobile Hamburger Menu */}
+            <div className="pt-3 border-t border-zinc-200">
+              {user ? (
+                <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-3.5 space-y-3">
+                  <div className="flex items-center gap-3">
+                    {user.photoURL ? (
+                      <img
+                        src={user.photoURL}
+                        alt={user.displayName || 'Usuario'}
+                        className="w-11 h-11 rounded-full object-cover border border-zinc-300 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded-full bg-zinc-900 text-white font-black text-sm flex items-center justify-center uppercase shrink-0">
+                        {(user.displayName || user.email || 'U')[0]}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="font-montserrat font-bold text-sm text-zinc-900 truncate">
+                        {user.displayName || 'Usuario Titan'}
+                      </div>
+                      <div className="text-xs text-zinc-500 truncate">{user.email}</div>
+                      <div className="mt-0.5">
+                        {user.email?.toLowerCase() === trainerEmail?.toLowerCase() ? (
+                          <span className="inline-flex items-center gap-1 bg-amber-500/15 text-amber-800 text-[10px] font-black uppercase px-2 py-0.5 rounded-full">
+                            ⚡ Administrador / Coach
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 bg-zinc-200/80 text-zinc-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full">
+                            🏋️ Atleta Titan Forge
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        onNavigateToAthletePortal?.();
+                      }}
+                      className="w-full py-2.5 px-3 rounded-xl bg-[#E50914] hover:bg-[#c90812] text-white text-xs font-montserrat font-black uppercase tracking-wider flex items-center justify-between shadow-sm cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span>🏋️</span>
+                        <span>Mi Portal del Atleta</span>
+                      </span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        onScrollToBooking();
+                      }}
+                      className="w-full py-2 px-3 rounded-xl bg-white border border-zinc-200 text-zinc-700 text-xs font-montserrat font-semibold flex items-center justify-between cursor-pointer"
+                    >
+                      <span>📅 Mis Reservas & Sesiones</span>
+                      <ChevronRight className="w-4 h-4 text-zinc-400" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        onLogout();
+                      }}
+                      className="w-full py-2 px-3 rounded-xl bg-zinc-200/70 hover:bg-red-50 hover:text-red-600 text-zinc-700 text-xs font-montserrat font-bold flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Cerrar sesión</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* Profile / Login Icon Button inside mobile menu */}
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileLoginOpen(!isMobileLoginOpen)}
+                    className={`w-full flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer ${
+                      isMobileLoginOpen
+                        ? 'border-[#E50914] bg-red-50/40'
+                        : 'border-zinc-200 bg-zinc-50 hover:border-zinc-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full border border-zinc-300 bg-white text-zinc-800 flex items-center justify-center shadow-2xs shrink-0">
+                        <UserIcon className="w-5 h-5 text-[#E50914]" />
+                      </div>
+                      <div className="text-left">
+                        <div className="font-montserrat font-bold text-xs uppercase text-zinc-900">
+                          Iniciar Sesión
+                        </div>
+                        <div className="text-[11px] text-zinc-500">
+                          Acceso para atletas con plan y administración
+                        </div>
+                      </div>
+                    </div>
+                    <ChevronRight
+                      className={`w-4 h-4 text-zinc-500 transition-transform ${
+                        isMobileLoginOpen ? 'rotate-90 text-[#E50914]' : ''
+                      }`}
+                    />
+                  </button>
+
+                  {isMobileLoginOpen && (
+                    <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-4 space-y-3 animate-fadeIn">
+                      <form onSubmit={handleEmailSubmit} className="space-y-2.5">
+                        <div>
+                          <label className="block text-[10px] font-montserrat font-bold text-zinc-700 uppercase tracking-wider mb-1">
+                            Correo electrónico
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="email"
+                              required
+                              value={loginEmail}
+                              onChange={(e) => {
+                                setLoginEmail(e.target.value);
+                                if (loginError) setLoginError(null);
+                              }}
+                              placeholder="atleta@ejemplo.com"
+                              className="w-full bg-white border border-zinc-200 rounded-xl pl-9 pr-3 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[#E50914]"
+                            />
+                            <Mail className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5 pointer-events-none" />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-montserrat font-bold text-zinc-700 uppercase tracking-wider mb-1">
+                            Contraseña
+                          </label>
+                          <div className="relative">
+                            <input
+                              type={showPassword ? 'text' : 'password'}
+                              required
+                              value={loginPassword}
+                              onChange={(e) => {
+                                setLoginPassword(e.target.value);
+                                if (loginError) setLoginError(null);
+                              }}
+                              placeholder="••••••••"
+                              className="w-full bg-white border border-zinc-200 rounded-xl pl-9 pr-9 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[#E50914]"
+                            />
+                            <Lock className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5 pointer-events-none" />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-2.5 text-zinc-400 hover:text-zinc-700 cursor-pointer"
+                              tabIndex={-1}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="w-4 h-4" />
+                              ) : (
+                                <Eye className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+
+                        {loginError && (
+                          <div className="flex items-center gap-1.5 p-2 rounded-lg bg-red-50 border border-red-200 text-red-700 text-[11px]">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            <span>{loginError}</span>
+                          </div>
+                        )}
+
+                        <button
+                          type="submit"
+                          disabled={isEmailLoggingIn}
+                          className="w-full py-2.5 px-4 rounded-xl bg-[#E50914] hover:bg-[#c90812] text-white font-montserrat font-bold text-xs uppercase tracking-wider shadow-sm cursor-pointer disabled:opacity-50"
+                        >
+                          {isEmailLoggingIn ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                        </button>
+                      </form>
+
+                      <div className="relative flex items-center justify-center py-1">
+                        <div className="border-t border-zinc-200 w-full" />
+                        <span className="bg-zinc-50 px-2 text-[10px] font-montserrat font-bold uppercase text-zinc-400 tracking-wider absolute">
+                          O continúa con
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled={isLoggingIn}
+                        onClick={async () => {
+                          await onLogin();
+                          setIsMobileMenuOpen(false);
+                          setIsMobileLoginOpen(false);
+                        }}
+                        className="w-full flex items-center justify-center gap-2.5 bg-white hover:bg-zinc-100 text-zinc-800 font-montserrat font-bold text-xs py-2.5 px-4 rounded-xl border border-zinc-300 shadow-2xs cursor-pointer disabled:opacity-50"
+                      >
+                        <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                          <path
+                            fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                          />
+                          <path
+                            fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                          />
+                          <path
+                            fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                          />
+                          <path
+                            fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                          />
+                        </svg>
+                        <span>{isLoggingIn ? 'Conectando...' : 'Ingresar con Google'}</span>
+                      </button>
+
+                      <div className="pt-1 text-center">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsMobileMenuOpen(false);
+                            setIsMobileLoginOpen(false);
+                            onNavigateToEnrollment?.();
+                          }}
+                          className="text-[#E50914] hover:underline font-bold text-[11px] cursor-pointer inline-flex items-center gap-1"
+                        >
+                          <span>¿No tienes un plan activo? Inscríbete aquí</span>
+                          <span>↗</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
