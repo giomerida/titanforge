@@ -205,7 +205,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#f59e0b', '#fbbf24', '#10b981', '#3b82f6'],
+        colors: ['#E50914', '#ef4444', '#10b981', '#ffffff'],
       });
 
       setConfirmedBooking({
@@ -245,7 +245,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
         {/* Successful Booking View */}
         {confirmedBooking ? (
           <div className="max-w-2xl mx-auto bg-zinc-900 border border-emerald-500/40 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-500 via-amber-400 to-emerald-500" />
+            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-500 via-[#E50914] to-emerald-500" />
             
             <div className="text-center mb-8">
               <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mx-auto flex items-center justify-center mb-4">
@@ -267,7 +267,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
               </div>
               <div className="flex justify-between items-center py-1 border-b border-zinc-900">
                 <span className="text-zinc-400">Fecha y Horario</span>
-                <span className="font-bold text-amber-400">
+                <span className="font-bold text-[#E50914]">
                   {confirmedBooking.details.date} ({confirmedBooking.details.timeSlot})
                 </span>
               </div>
@@ -298,7 +298,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                   href={confirmedBooking.calendarHtmlLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold py-3.5 px-4 rounded-xl transition-all shadow-md"
+                  className="w-full flex items-center justify-center gap-2 bg-[#E50914] hover:bg-[#c90812] text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-md shadow-red-600/25"
                 >
                   <ExternalLink className="w-4 h-4" />
                   <span>Abrir en Google Calendar</span>
@@ -308,7 +308,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                   href={generateGoogleCalendarWebUrl(confirmedBooking.details)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold py-3.5 px-4 rounded-xl transition-all shadow-md"
+                  className="w-full flex items-center justify-center gap-2 bg-[#E50914] hover:bg-[#c90812] text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-md shadow-red-600/25"
                 >
                   <CalendarIcon className="w-4 h-4" />
                   <span>Agregar a mi Google Calendar</span>
@@ -329,7 +329,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                   onClick={() => {
                     setConfirmedBooking(null);
                   }}
-                  className="text-xs text-zinc-400 hover:text-amber-400 underline font-medium transition-colors"
+                  className="text-xs text-zinc-400 hover:text-[#E50914] underline font-medium transition-colors"
                 >
                   Agendar otra cita de entrenamiento
                 </button>
@@ -345,7 +345,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
               <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 sm:p-7">
                 <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                   <div className="flex items-center gap-2.5">
-                    <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center">
+                    <span className="w-6 h-6 rounded-full bg-[#E50914]/20 text-[#E50914] text-xs font-bold flex items-center justify-center">
                       1
                     </span>
                     <h3 className="text-base font-bold text-white font-display">
@@ -354,8 +354,8 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                   </div>
 
                   {/* Mode selector: Solo presencial con el mismo estilo del paso 2 */}
-                  <div className="flex items-center gap-2 bg-zinc-950 px-3 py-1.5 rounded-lg border border-amber-500/30 text-xs text-amber-400 font-bold">
-                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                  <div className="flex items-center gap-2 bg-zinc-950 px-3 py-1.5 rounded-lg border border-[#E50914]/30 text-xs text-[#E50914] font-bold">
+                    <span className="w-2 h-2 rounded-full bg-[#E50914] animate-pulse" />
                     <span>Presencial</span>
                   </div>
                 </div>
@@ -377,18 +377,18 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                         onClick={() => onServiceChange(srv)}
                         className={`text-left p-4 rounded-xl border transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-amber-500/15 border-amber-400 shadow-md ring-1 ring-amber-400/40'
+                            ? 'bg-[#E50914]/15 border-[#E50914] shadow-md ring-1 ring-[#E50914]/40'
                             : 'bg-zinc-950/60 border-zinc-800 hover:border-zinc-700'
                         }`}
                       >
                         <div className="flex items-center justify-between gap-1 mb-1">
                           <span className={`text-sm font-montserrat font-black uppercase tracking-wider ${
-                            isSelected ? 'text-amber-300' : 'text-white'
+                            isSelected ? 'text-red-400' : 'text-white'
                           }`}>
                             {planBadgeName}
                           </span>
                           {srv.popular && (
-                            <span className="text-[9px] font-bold uppercase bg-amber-500/30 text-amber-300 px-1.5 py-0.5 rounded">
+                            <span className="text-[9px] font-bold uppercase bg-[#E50914]/25 text-red-400 px-1.5 py-0.5 rounded">
                               Top
                             </span>
                           )}
@@ -396,7 +396,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                         <div className="text-[11px] text-zinc-300 font-medium line-clamp-1">
                           {srv.title.split('·')[1]?.trim() || srv.title}
                         </div>
-                        <div className="text-xs text-amber-400 font-bold mt-2">{srv.price}</div>
+                        <div className="text-xs text-[#E50914] font-bold mt-2">{srv.price}</div>
                         <div className="text-[10px] text-zinc-500 mt-0.5">{srv.durationMinutes} min · Presencial</div>
                       </button>
                     );
@@ -407,7 +407,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
               {/* Step 2: Date & Slot Calendar */}
               <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 sm:p-7">
                 <div className="flex items-center gap-2.5 mb-6">
-                  <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center">
+                  <span className="w-6 h-6 rounded-full bg-[#E50914]/20 text-[#E50914] text-xs font-bold flex items-center justify-center">
                     2
                   </span>
                   <h3 className="text-base font-bold text-white font-display">
@@ -471,7 +471,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                             onClick={() => setSelectedDate(dStr)}
                             className={`h-9 rounded-lg text-xs font-medium flex items-center justify-center transition-all ${
                               isSelected
-                                ? 'bg-amber-400 text-zinc-950 font-bold shadow-md shadow-amber-400/20'
+                                ? 'bg-[#E50914] text-white font-bold shadow-md shadow-red-600/30'
                                 : isPast || isSunday
                                 ? 'text-zinc-700 cursor-not-allowed opacity-40'
                                 : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
@@ -487,7 +487,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                   {/* Available Time Slots */}
                   <div className="md:col-span-5 space-y-2">
                     <div className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-amber-400" />
+                      <Clock className="w-3.5 h-3.5 text-[#E50914]" />
                       <span>Horarios Disponibles</span>
                     </div>
 
@@ -501,12 +501,12 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                             onClick={() => setSelectedSlot(slot)}
                             className={`w-full py-2.5 px-3 text-xs font-medium rounded-lg text-left transition-all flex items-center justify-between border ${
                               isSlotSelected
-                                ? 'bg-amber-500/15 border-amber-400 text-amber-300 font-bold'
+                                ? 'bg-[#E50914]/15 border-[#E50914] text-red-400 font-bold'
                                 : 'bg-zinc-950/60 border-zinc-800/80 text-zinc-300 hover:border-zinc-700 hover:text-white'
                             }`}
                           >
                             <span>{slot}</span>
-                            {isSlotSelected && <Sparkles className="w-3.5 h-3.5 text-amber-400" />}
+                            {isSlotSelected && <Sparkles className="w-3.5 h-3.5 text-[#E50914]" />}
                           </button>
                         );
                       })}
@@ -523,7 +523,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                 className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-xl space-y-5"
               >
                 <div className="flex items-center gap-2.5 pb-3 border-b border-zinc-800">
-                  <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center">
+                  <span className="w-6 h-6 rounded-full bg-[#E50914]/20 text-[#E50914] text-xs font-bold flex items-center justify-center">
                     3
                   </span>
                   <div>
@@ -555,7 +555,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                       placeholder="Tu nombre y apellido"
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-all"
+                      className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -572,7 +572,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                       placeholder="ejemplo@gmail.com"
                       value={clientEmail}
                       onChange={(e) => setClientEmail(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-all"
+                      className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-all"
                     />
                   </div>
                   <span className="text-[11px] text-zinc-500 mt-1 block">
@@ -591,7 +591,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                       placeholder="+52 (55) 0000-0000"
                       value={clientPhone}
                       onChange={(e) => setClientPhone(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-all"
+                      className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -607,7 +607,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                       placeholder="Ej. Hipertrofia de tren superior / Dolor de hombro"
                       value={clientGoals}
                       onChange={(e) => setClientGoals(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-all"
+                      className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -620,7 +620,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                   </div>
                   <div className="flex justify-between text-zinc-400">
                     <span>Entrenador:</span>
-                    <span className="text-amber-400 font-medium">Giovanni Mérida</span>
+                    <span className="text-[#E50914] font-medium">Giovanni Mérida</span>
                   </div>
                   <div className="flex justify-between text-zinc-400">
                     <span>Total a pagar en sesión:</span>
@@ -631,7 +631,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-zinc-950 font-extrabold py-4 px-6 rounded-xl transition-all shadow-xl shadow-amber-500/20 active:scale-98 disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#E50914] to-red-600 hover:from-[#c90812] hover:to-red-700 text-white font-extrabold py-4 px-6 rounded-xl transition-all shadow-xl shadow-red-600/25 active:scale-98 disabled:opacity-50"
                 >
                   <CalendarIcon className="w-5 h-5" />
                   <span>
@@ -654,7 +654,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
           <div className="bg-zinc-900 border border-zinc-700/80 rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-[#E50914]/20 text-[#E50914] flex items-center justify-center shrink-0">
                 <CalendarIcon className="w-5 h-5" />
               </div>
               <div>
@@ -696,7 +696,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
               <button
                 type="button"
                 onClick={executeBooking}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs transition-all shadow-md"
+                className="px-5 py-2.5 rounded-xl bg-[#E50914] hover:bg-[#c90812] text-white font-bold text-xs transition-all shadow-md shadow-red-600/25"
               >
                 Confirmar y Agendar
               </button>
