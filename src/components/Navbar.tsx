@@ -27,8 +27,9 @@ interface NavbarProps {
   onScrollToBooking: () => void;
   onNavigateToEnrollment?: () => void;
   onNavigateToAthletePortal?: () => void;
+  onNavigateToAdminPortal?: () => void;
   onNavigateHome?: () => void;
-  currentView?: 'landing' | 'inscripcion' | 'atleta';
+  currentView?: 'landing' | 'inscripcion' | 'atleta' | 'admin';
   trainerEmail?: string;
 }
 
@@ -41,10 +42,15 @@ export const Navbar: React.FC<NavbarProps> = ({
   onScrollToBooking,
   onNavigateToEnrollment,
   onNavigateToAthletePortal,
+  onNavigateToAdminPortal,
   onNavigateHome,
   currentView = 'landing',
   trainerEmail,
 }) => {
+  const isAdminUser =
+    !!user?.email &&
+    !!trainerEmail &&
+    user.email.toLowerCase() === trainerEmail.toLowerCase();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -97,13 +103,18 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
     setIsEmailLoggingIn(true);
     try {
+      const signedEmail = loginEmail.trim().toLowerCase();
       await emailPasswordSignIn(loginEmail, loginPassword);
       setIsProfileOpen(false);
       setIsMobileMenuOpen(false);
       setIsMobileLoginOpen(false);
       setLoginEmail('');
       setLoginPassword('');
-      onNavigateToAthletePortal?.();
+      if (trainerEmail && signedEmail === trainerEmail.toLowerCase()) {
+        onNavigateToAdminPortal?.();
+      } else {
+        onNavigateToAthletePortal?.();
+      }
     } catch (err: unknown) {
       console.error('Login error:', err);
       const code = (err as { code?: string })?.code || '';
@@ -136,7 +147,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => {
-              if (currentView === 'inscripcion' || currentView === 'atleta') onNavigateHome?.();
+              if (currentView !== 'landing') onNavigateHome?.();
               else window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             className={`flex items-center py-1 transition-all duration-300 ease-in-out cursor-pointer ${
@@ -164,7 +175,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => {
-                if (currentView === 'inscripcion' || currentView === 'atleta') onNavigateHome?.();
+                if (currentView !== 'landing') onNavigateHome?.();
                 else window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               aria-label="Titan Forge Inicio"
@@ -179,12 +190,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Center Navigation Menu: Inicio | Entrenamiento | Calculadora | Inscripción | Sobre Titan Forge */}
-        <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-[13px] font-montserrat font-semibold text-[#1a1a1a]">
+        {/* Center Navigation Menu: Inicio | Entrenamiento | Calculadora | Inscripción | Portal Atleta | Portal Admin | Sobre Titan Forge */}
+        <nav className="hidden lg:flex items-center gap-4 xl:gap-6 text-[13px] font-montserrat font-semibold text-[#1a1a1a] whitespace-nowrap">
           <button
             type="button"
             onClick={() => {
-              if (currentView === 'inscripcion' || currentView === 'atleta') onNavigateHome?.();
+              if (currentView !== 'landing') onNavigateHome?.();
               else window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             className={`${
@@ -199,7 +210,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => {
-              if (currentView === 'inscripcion' || currentView === 'atleta') {
+              if (currentView !== 'landing') {
                 onNavigateHome?.();
                 setTimeout(() => {
                   document.getElementById('entrenamiento')?.scrollIntoView({ behavior: 'smooth' });
@@ -217,7 +228,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => {
-              if (currentView === 'inscripcion' || currentView === 'atleta') {
+              if (currentView !== 'landing') {
                 onNavigateHome?.();
                 setTimeout(() => onOpenCalculator(), 100);
               } else {
@@ -253,15 +264,29 @@ export const Navbar: React.FC<NavbarProps> = ({
             } transition-colors cursor-pointer font-semibold flex items-center gap-1.5`}
           >
             <span>Portal Atleta</span>
-            {user && (
+            {user && !isAdminUser && (
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             )}
+          </button>
+
+          {/* Portal Administrador button */}
+          <button
+            type="button"
+            onClick={() => onNavigateToAdminPortal?.()}
+            className={`${
+              currentView === 'admin'
+                ? 'text-[#E50914] border-b-2 border-[#E50914] pb-0.5 font-bold'
+                : 'hover:text-[#E50914] text-zinc-700'
+            } transition-colors cursor-pointer font-semibold flex items-center gap-1`}
+          >
+            <Shield className="w-3.5 h-3.5 text-[#E50914]" />
+            <span>Portal Admin</span>
           </button>
 
           <button
             type="button"
             onClick={() => {
-              if (currentView === 'inscripcion' || currentView === 'atleta') {
+              if (currentView !== 'landing') {
                 onNavigateHome?.();
                 setTimeout(() => {
                   document.getElementById('sobre-titan-forge')?.scrollIntoView({ behavior: 'smooth' });
@@ -382,6 +407,23 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                     {/* Quick navigation actions */}
                     <div className="space-y-1.5 text-xs font-montserrat font-semibold text-zinc-700">
+                      {isAdminUser && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsProfileOpen(false);
+                            onNavigateToAdminPortal?.();
+                          }}
+                          className="w-full py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-black text-white text-xs font-montserrat font-black uppercase tracking-wider flex items-center justify-between shadow-md transition-all cursor-pointer active:scale-98"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Shield className="w-4 h-4 text-[#E50914]" />
+                            <span>Panel de Administrador</span>
+                          </div>
+                          <ChevronRight className="w-4 h-4 stroke-[3]" />
+                        </button>
+                      )}
+
                       <button
                         type="button"
                         onClick={() => {
@@ -604,7 +646,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
-                  if (currentView === 'inscripcion' || currentView === 'atleta') onNavigateHome?.();
+                  if (currentView !== 'landing') onNavigateHome?.();
                   else window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className={`w-full text-left px-3.5 py-2.5 rounded-xl transition-colors cursor-pointer flex items-center justify-between ${
@@ -621,7 +663,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
-                  if (currentView === 'inscripcion' || currentView === 'atleta') {
+                  if (currentView !== 'landing') {
                     onNavigateHome?.();
                     setTimeout(() => {
                       document.getElementById('entrenamiento')?.scrollIntoView({ behavior: 'smooth' });
@@ -640,7 +682,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
-                  if (currentView === 'inscripcion' || currentView === 'atleta') {
+                  if (currentView !== 'landing') {
                     onNavigateHome?.();
                     setTimeout(() => onOpenCalculator(), 100);
                   } else {
@@ -692,7 +734,26 @@ export const Navbar: React.FC<NavbarProps> = ({
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
-                  if (currentView === 'inscripcion' || currentView === 'atleta') {
+                  onNavigateToAdminPortal?.();
+                }}
+                className={`w-full text-left px-3.5 py-2.5 rounded-xl transition-colors cursor-pointer flex items-center justify-between ${
+                  currentView === 'admin'
+                    ? 'bg-red-50 text-[#E50914] font-bold'
+                    : 'hover:bg-zinc-100 text-zinc-800'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-[#E50914]" />
+                  <span>Portal Administrador</span>
+                </span>
+                <ChevronRight className="w-4 h-4 opacity-50" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  if (currentView !== 'landing') {
                     onNavigateHome?.();
                     setTimeout(() => {
                       document.getElementById('sobre-titan-forge')?.scrollIntoView({ behavior: 'smooth' });
@@ -744,6 +805,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
 
                   <div className="space-y-1.5">
+                    {isAdminUser && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          onNavigateToAdminPortal?.();
+                        }}
+                        className="w-full py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-black text-white text-xs font-montserrat font-black uppercase tracking-wider flex items-center justify-between shadow-sm cursor-pointer"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Shield className="w-4 h-4 text-[#E50914]" />
+                          <span>Panel de Administrador</span>
+                        </span>
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    )}
+
                     <button
                       type="button"
                       onClick={() => {

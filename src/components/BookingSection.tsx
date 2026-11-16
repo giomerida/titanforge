@@ -35,6 +35,7 @@ interface BookingSectionProps {
   selectedService: ServiceItem;
   onServiceChange: (service: ServiceItem) => void;
   trainerEmail: string;
+  onBookingConfirmed?: (booking: BookingDetails) => void;
 }
 
 export const BookingSection: React.FC<BookingSectionProps> = ({
@@ -43,6 +44,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
   selectedService,
   onServiceChange,
   trainerEmail,
+  onBookingConfirmed,
 }) => {
   // Booking Form State
   const [selectedDate, setSelectedDate] = useState<string>(() => {
@@ -213,6 +215,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
         calendarHtmlLink,
         emailSent: emailResult.clientSent || emailResult.trainerSent,
       });
+      onBookingConfirmed?.(booking);
     } catch (err: unknown) {
       console.error('Error al agendar cita:', err);
       setErrorMsg(

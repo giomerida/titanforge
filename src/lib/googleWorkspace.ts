@@ -93,6 +93,54 @@ Agendado a través de la plataforma web de Giovanni Mérida.
   return result;
 }
 
+export interface GoogleCalendarEventItem {
+  id: string;
+  summary?: string;
+  description?: string;
+  location?: string;
+  htmlLink?: string;
+  start?: { dateTime?: string; date?: string };
+  end?: { dateTime?: string; date?: string };
+  attendees?: Array<{ email?: string; displayName?: string }>;
+}
+
+/**
+ * Fetches upcoming/monthly events from primary Google Calendar
+ */
+export async function fetchGoogleCalendarEvents(
+  accessToken: string,
+  timeMinIso: string,
+  timeMaxIso: string,
+  calendarId: string = 'primary'
+): Promise<GoogleCalendarEventItem[]> {
+  const params = new URLSearchParams({
+    timeMin: timeMinIso,
+    timeMax: timeMaxIso,
+    singleEvents: 'true',
+    orderBy: 'startTime',
+    maxResults: '50',
+  });
+
+  const targetCalendar = calendarId.trim() ? encodeURIComponent(calendarId.trim()) : 'primary';
+
+  const response = await fetch(
+    `https://www.googleapis.com/calendar/v3/calendars/${targetCalendar}/events?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Error al leer Google Calendar (${response.status}): ${errorText}`);
+  }
+
+  const data = await response.json();
+  return Array.isArray(data.items) ? data.items : [];
+}
+
 /**
  * Creates raw email RFC 2822 base64url encoded for Gmail API
  */

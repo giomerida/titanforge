@@ -11,17 +11,33 @@ import { ReadyToStartCTA } from './components/ReadyToStartCTA';
 import { BMICalculatorModal } from './components/BMICalculatorModal';
 import { EnrollmentSection, EnrollmentPlanInfo } from './components/EnrollmentSection';
 import { AthletePortal } from './components/AthletePortal';
+import { AdminPortal } from './components/AdminPortal';
 import { SERVICES_DATA, ServiceItem } from './data/landingData';
 import { initAuth, googleSignIn, logout } from './lib/firebase';
-import { ShieldCheck } from 'lucide-react';
+import { BookingDetails } from './lib/googleWorkspace';
+import {
+  AthleteRecord,
+  ScheduledSession,
+  WeeksByLevel,
+  loadAthletes,
+  saveAthletes,
+  loadSessions,
+  saveSessions,
+  loadWeeksByLevel,
+  saveWeeksByLevel,
+  loadCalendarEmail,
+  saveCalendarEmail,
+} from './data/titanForgeStore';
+import { ShieldCheck, Shield } from 'lucide-react';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [selectedService, setSelectedService] = useState<ServiceItem>(SERVICES_DATA[1]); // Default to Intermedio
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<'landing' | 'inscripcion' | 'atleta'>(() => {
+  const [currentView, setCurrentView] = useState<'landing' | 'inscripcion' | 'atleta' | 'admin'>(() => {
     if (typeof window === 'undefined') return 'landing';
+    if (window.location.hash === '#admin') return 'admin';
     if (window.location.hash === '#atleta') return 'atleta';
     if (window.location.hash === '#inscripcion') return 'inscripcion';
     return 'landing';
@@ -32,12 +48,41 @@ export default function App() {
     price: '$45 USD',
   });
 
-  // Trainer's email account for notifications & calendars
-  const TRAINER_EMAIL = 'amauryuchiha@gmail.com';
+  // Shared persisted store state for Athletes, Weeks/Videos by Level, and Sessions
+  const [athletes, setAthletes] = useState<AthleteRecord[]>(() => loadAthletes());
+  const [weeksByLevel, setWeeksByLevel] = useState<WeeksByLevel>(() => loadWeeksByLevel());
+  const [sessions, setSessions] = useState<ScheduledSession[]>(() => loadSessions());
+
+  const handleUpdateAthletes = (updated: AthleteRecord[]) => {
+    setAthletes(updated);
+    saveAthletes(updated);
+  };
+
+  const handleUpdateWeeksByLevel = (updated: WeeksByLevel) => {
+    setWeeksByLevel(updated);
+    saveWeeksByLevel(updated);
+  };
+
+  const handleUpdateSessions = (updated: ScheduledSession[]) => {
+    setSessions(updated);
+    saveSessions(updated);
+  };
+
+  // Configurable trainer/admin Gmail account for Google Calendar & notifications
+  const [trainerEmail, setTrainerEmail] = useState<string>(() => loadCalendarEmail());
+
+  const handleUpdateTrainerEmail = (newEmail: string) => {
+    const clean = newEmail.trim();
+    if (!clean) return;
+    setTrainerEmail(clean);
+    saveCalendarEmail(clean);
+  };
 
   useEffect(() => {
     const handleHashChange = () => {
-      if (window.location.hash === '#atleta') {
+      if (window.location.hash === '#admin') {
+        setCurrentView('admin');
+      } else if (window.location.hash === '#atleta') {
         setCurrentView('atleta');
       } else if (window.location.hash === '#inscripcion') {
         setCurrentView('inscripcion');
@@ -69,13 +114,23 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleNavigateToAdminPortal = () => {
+    setCurrentView('admin');
+    window.location.hash = 'admin';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleLogin = async () => {
     setIsLoggingIn(true);
     try {
       const result = await googleSignIn();
       if (result) {
         setUser(result.user);
-        handleNavigateToAthletePortal();
+        if (result.user.email?.toLowerCase() === trainerEmail.toLowerCase()) {
+          handleNavigateToAdminPortal();
+        } else {
+          handleNavigateToAthletePortal();
+        }
       }
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
@@ -88,7 +143,7 @@ export default function App() {
     try {
       await logout();
       setUser(null);
-      if (currentView === 'atleta') {
+      if (currentView === 'atleta' || currentView === 'admin') {
         handleNavigateHome();
       }
     } catch (error) {
@@ -141,7 +196,7 @@ export default function App() {
   };
 
   const scrollToCalculator = () => {
-    if (currentView === 'inscripcion' || currentView === 'atleta') {
+    if (currentView !== 'landing') {
       setCurrentView('landing');
       window.location.hash = 'calculadora';
       setTimeout(() => {
@@ -156,6 +211,65 @@ export default function App() {
     }
   };
 
+  const handleAthleteEnrolled = (data: {
+    fullName: string;
+    email: string;
+    phone: string;
+    planName: 'Fundation' | 'Performance' | 'Elite';
+    membershipId: string;
+  }) => {
+    const today = new Date();
+    const enrollmentDate = today.toISOString().split('T')[0];
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+    const nextPaymentDate = nextMonth.toISOString().split('T')[0];
+
+    const newAthlete: AthleteRecord = {
+      id: `ath-${Date.now()}`,
+      membershipId: data.membershipId,
+      fullName: data.fullName || 'Nuevo Atleta Titan',
+      email: data.email || '',
+      phone: data.phone || '',
+      planName: data.planName,
+      goal: 'Evaluación inicial y recomposición física',
+      status: 'Activo',
+      enrollmentDate,
+      paymentDayOfMonth: today.getDate(),
+      nextPaymentDate,
+      assignedCoach: 'Coach Titan Forge',
+      notes: 'Inscrito desde el Portal de Inscripción Oficial.',
+    };
+
+    const existingIdx = athletes.findIndex(
+      (a) => a.email.toLowerCase() === newAthlete.email.toLowerCase() && newAthlete.email !== ''
+    );
+
+    if (existingIdx >= 0) {
+      const updated = [...athletes];
+      updated[existingIdx] = { ...updated[existingIdx], ...newAthlete, id: updated[existingIdx].id };
+      handleUpdateAthletes(updated);
+    } else {
+      handleUpdateAthletes([newAthlete, ...athletes]);
+    }
+  };
+
+  const handleBookingConfirmed = (booking: BookingDetails) => {
+    const newSession: ScheduledSession = {
+      id: `sess-${Date.now()}`,
+      date: booking.date,
+      timeSlot: booking.timeSlot,
+      athleteName: booking.clientName,
+      athleteEmail: booking.clientEmail,
+      athletePhone: booking.clientPhone,
+      planTitle: booking.serviceTitle,
+      trainingType: booking.trainingType,
+      goal: booking.clientGoals || 'Sesión personalizada Titan Forge',
+      status: 'Confirmada',
+      source: 'Sistema Web',
+      notes: booking.notes || `Agendada desde la plataforma (${booking.trainingType}).`,
+    };
+    handleUpdateSessions([newSession, ...sessions]);
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col selection:bg-red-600 selection:text-white">
       {/* Fixed Header with Titan Forge Logo & Menu */}
@@ -165,7 +279,7 @@ export default function App() {
         onLogout={handleLogout}
         isLoggingIn={isLoggingIn}
         onScrollToBooking={() => {
-          if (currentView === 'inscripcion' || currentView === 'atleta') {
+          if (currentView !== 'landing') {
             setCurrentView('landing');
             setTimeout(() => scrollToBooking(), 100);
           } else {
@@ -179,18 +293,36 @@ export default function App() {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         onNavigateToAthletePortal={handleNavigateToAthletePortal}
+        onNavigateToAdminPortal={handleNavigateToAdminPortal}
         onNavigateHome={handleNavigateHome}
         currentView={currentView}
-        trainerEmail={TRAINER_EMAIL}
+        trainerEmail={trainerEmail}
       />
 
       {/* Main Content Area */}
       <main className="flex-1">
-        {currentView === 'atleta' ? (
+        {currentView === 'admin' ? (
+          /* SECCIÓN INDEPENDIENTE: PANEL DE ADMINISTRADOR */
+          <AdminPortal
+            user={user}
+            trainerEmail={trainerEmail}
+            onUpdateTrainerEmail={handleUpdateTrainerEmail}
+            athletes={athletes}
+            onUpdateAthletes={handleUpdateAthletes}
+            weeksByLevel={weeksByLevel}
+            onUpdateWeeksByLevel={handleUpdateWeeksByLevel}
+            sessions={sessions}
+            onUpdateSessions={handleUpdateSessions}
+            onNavigateHome={handleNavigateHome}
+            onNavigateToAthletePortal={handleNavigateToAthletePortal}
+            onLogout={handleLogout}
+          />
+        ) : currentView === 'atleta' ? (
           /* SECCIÓN INDEPENDIENTE: PORTAL DEL ATLETA */
           <AthletePortal
             user={user}
             planInfo={enrollmentPlan}
+            weeksByLevel={weeksByLevel}
             onNavigateHome={handleNavigateHome}
             onLogout={handleLogout}
             onScrollToBooking={() => {
@@ -198,7 +330,7 @@ export default function App() {
               window.location.hash = 'reservas';
               setTimeout(() => scrollToBooking(), 120);
             }}
-            trainerEmail={TRAINER_EMAIL}
+            trainerEmail={trainerEmail}
           />
         ) : currentView === 'inscripcion' ? (
           /* SECCIÓN INDEPENDIENTE: PORTAL DE INSCRIPCIÓN OFICIAL */
@@ -209,6 +341,7 @@ export default function App() {
             onSuccessSchedule={handleEnrollmentSuccessSchedule}
             onNavigateToPortal={handleNavigateToAthletePortal}
             onBackToHome={handleNavigateHome}
+            onAthleteEnrolled={handleAthleteEnrolled}
           />
         ) : (
           /* VISTA PRINCIPAL: LANDING COMPLETA */
@@ -245,7 +378,8 @@ export default function App() {
               onLogin={handleLogin}
               selectedService={selectedService}
               onServiceChange={setSelectedService}
-              trainerEmail={TRAINER_EMAIL}
+              trainerEmail={trainerEmail}
+              onBookingConfirmed={handleBookingConfirmed}
             />
 
             {/* 6. Banner Final CTA: "¿LISTO PARA EMPEZAR?" */}
@@ -273,9 +407,19 @@ export default function App() {
             </a>
           </p>
 
-          <div className="flex items-center gap-2 text-zinc-400 font-medium">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Google Calendar & Gmail Sync Integrado</span>
+          <div className="flex flex-wrap items-center justify-center gap-4 text-zinc-400 font-medium">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>Google Calendar & Gmail Sync Integrado</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleNavigateToAdminPortal}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+            >
+              <Shield className="w-3.5 h-3.5 text-[#E50914]" />
+              <span>Panel Admin</span>
+            </button>
           </div>
         </div>
       </footer>

@@ -30,6 +30,13 @@ interface EnrollmentSectionProps {
   onSuccessSchedule: () => void;
   onNavigateToPortal?: () => void;
   onBackToHome?: () => void;
+  onAthleteEnrolled?: (data: {
+    fullName: string;
+    email: string;
+    phone: string;
+    planName: 'Fundation' | 'Performance' | 'Elite';
+    membershipId: string;
+  }) => void;
 }
 
 const AVAILABLE_PLANS: Record<
@@ -94,6 +101,7 @@ export const EnrollmentSection: React.FC<EnrollmentSectionProps> = ({
   onSuccessSchedule,
   onNavigateToPortal,
   onBackToHome,
+  onAthleteEnrolled,
 }) => {
   // Determine active plan (defaulting to Performance if none provided)
   const activeLevel: 'principiante' | 'intermedio' | 'avanzado' =
@@ -193,6 +201,13 @@ export const EnrollmentSection: React.FC<EnrollmentSectionProps> = ({
     setTimeout(() => {
       setIsProcessing(false);
       setIsSuccess(true);
+      onAthleteEnrolled?.({
+        fullName: fullName.trim() || 'Nuevo Atleta Titan',
+        email: email.trim(),
+        phone: phone.trim() || 'Por registrar',
+        planName: selectedPlanData.name as 'Fundation' | 'Performance' | 'Elite',
+        membershipId: randomId,
+      });
       try {
         confetti({
           particleCount: 90,

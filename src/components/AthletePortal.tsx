@@ -30,386 +30,46 @@ import {
 import { User } from 'firebase/auth';
 import confetti from 'canvas-confetti';
 import { EnrollmentPlanInfo } from './EnrollmentSection';
+import {
+  WeekPlan,
+  ExerciseVideoItem,
+  DEFAULT_WEEKS_DATA,
+  ProgramLevel,
+  WeeksByLevel,
+  isDirectVideoFile,
+} from '../data/titanForgeStore';
 
 interface AthletePortalProps {
   user: User | null;
   planInfo: EnrollmentPlanInfo | null;
+  weeksData?: WeekPlan[];
+  weeksByLevel?: WeeksByLevel;
   onNavigateHome: () => void;
   onLogout: () => void;
   onScrollToBooking: () => void;
   trainerEmail?: string;
 }
 
-interface ExerciseVideoItem {
-  id: string;
-  name: string;
-  category: 'Fuerza' | 'Potencia' | 'Movilidad' | 'Metabólico';
-  setsReps: string;
-  rir: string;
-  rest: string;
-  videoUrl: string; // Video URL (MP4 or YouTube embed)
-  videoThumbnail: string;
-  technicalTips: string[];
-  muscleGroup: string;
-  commonMistakes: string;
-}
-
-interface WorkoutDay {
-  dayNumber: number;
-  dayName: string;
-  focus: string;
-  estimatedDuration: string;
-  exercises: ExerciseVideoItem[];
-}
-
-interface WeekPlan {
-  weekNumber: number;
-  title: string;
-  phaseName: string;
-  rirTarget: string;
-  volumeTarget: string;
-  description: string;
-  coachAdvice: string;
-  days: WorkoutDay[];
-}
-
-const WEEKS_DATA: WeekPlan[] = [
-  {
-    weekNumber: 1,
-    title: 'Semana 1: Adaptación Neuromuscular & Patrones Base',
-    phaseName: 'Fase de Calibración',
-    rirTarget: 'RIR 3–4 (Esfuerzo moderado)',
-    volumeTarget: '3 series efectivas por patrón motor',
-    description:
-      'Semana de ajuste neuromuscular, evaluación de técnica en los ejercicios principales y calibración de cargas base sin llegar al fallo.',
-    coachAdvice:
-      'Prioriza el control del tempo excéntrico (3 segundos de bajada). No persigas récords esta semana; busca que cada repetición se sienta impecable.',
-    days: [
-      {
-        dayNumber: 1,
-        dayName: 'Día 1: Tren Superior (Empuje & Tracción Base)',
-        focus: 'Fuerza base en pectoral, dorsal y hombro con cadencia controlada',
-        estimatedDuration: '60 min',
-        exercises: [
-          {
-            id: 'w1-d1-e1',
-            name: 'Press de Banca Plano con Barra',
-            category: 'Fuerza',
-            setsReps: '4 series x 6–8 repeticiones',
-            rir: 'RIR 3',
-            rest: '90–120 seg',
-            videoUrl: 'https://www.youtube-nocookie.com/embed/rT7DgCr-3pg?autoplay=1&mute=1&loop=1&playlist=rT7DgCr-3pg',
-            videoThumbnail:
-              'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80',
-            technicalTips: [
-              'Retracción y depresión escapular completa antes de sacar la barra.',
-              'Pausa de 1 segundo en el pecho manteniendo la tensión sin rebotar.',
-              'Empuje firme clavando los talones contra el suelo (Leg Drive).',
-            ],
-            muscleGroup: 'Pectoral mayor, tríceps braquial, deltoides anterior',
-            commonMistakes: 'Despegar los glúteos del banco o abrir excesivamente los codos.',
-          },
-          {
-            id: 'w1-d1-e2',
-            name: 'Remo con Barra con Agarre Prono',
-            category: 'Fuerza',
-            setsReps: '4 series x 8–10 repeticiones',
-            rir: 'RIR 3',
-            rest: '90 seg',
-            videoUrl: 'https://www.youtube-nocookie.com/embed/FWJR5Ve8gkQ?autoplay=1&mute=1&loop=1&playlist=FWJR5Ve8gkQ',
-            videoThumbnail:
-              'https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=800&q=80',
-            technicalTips: [
-              'Inclinación de torso a 45 grados manteniendo columna neutra.',
-              'Tira con los codos hacia la cadera, apretando escápulas al final.',
-              'Evita el tirón brusco con la zona lumbar.',
-            ],
-            muscleGroup: 'Dorsal ancho, romboides, trapecio medio, bíceps',
-            commonMistakes: 'Erguir el torso por exceso de peso o perder la lordosis neutra.',
-          },
-          {
-            id: 'w1-d1-e3',
-            name: 'Press Militar de Pie con Mancuernas',
-            category: 'Fuerza',
-            setsReps: '3 series x 10–12 repeticiones',
-            rir: 'RIR 3',
-            rest: '75 seg',
-            videoUrl: 'https://www.youtube-nocookie.com/embed/qEwKCR5JCog?autoplay=1&mute=1&loop=1&playlist=qEwKCR5JCog',
-            videoThumbnail:
-              'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&q=80',
-            technicalTips: [
-              'Glúteos y abdomen bien compactos para no hiperextender la zona lumbar.',
-              'Trayectoria en arco natural terminando con los brazos alineados con las orejas.',
-            ],
-            muscleGroup: 'Deltoides anterior y lateral, tríceps, serrato anterior',
-            commonMistakes: 'Arquear la espalda baja en exceso al empujar hacia arriba.',
-          },
-        ],
-      },
-      {
-        dayNumber: 2,
-        dayName: 'Día 2: Tren Inferior & Dominancia de Cadera',
-        focus: 'Patrones biomecánicos de sentadilla y bisagra de cadera',
-        estimatedDuration: '65 min',
-        exercises: [
-          {
-            id: 'w1-d2-e1',
-            name: 'Sentadilla Trasera con Barra (Back Squat)',
-            category: 'Fuerza',
-            setsReps: '4 series x 6–8 repeticiones',
-            rir: 'RIR 3',
-            rest: '120 seg',
-            videoUrl: 'https://www.youtube-nocookie.com/embed/MVMNk0HiTMg?autoplay=1&mute=1&loop=1&playlist=MVMNk0HiTMg',
-            videoThumbnail:
-              'https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=800&q=80',
-            technicalTips: [
-              'Pies al ancho de hombros con ligera rotación externa de 15 a 30 grados.',
-              'Presión intraabdominal (maniobra de Valsalva) antes del descenso.',
-              'Profundidad paralela o sub-paralela según movilidad de tobillo.',
-            ],
-            muscleGroup: 'Cuádriceps, glúteo mayor, aductores, erectores espinales',
-            commonMistakes: 'Valgo de rodilla (colapso hacia adentro) o levantar los talones.',
-          },
-          {
-            id: 'w1-d2-e2',
-            name: 'Peso Muerto Rumano con Mancuernas',
-            category: 'Fuerza',
-            setsReps: '4 series x 8–10 repeticiones',
-            rir: 'RIR 3',
-            rest: '90 seg',
-            videoUrl: 'https://www.youtube-nocookie.com/embed/jEy_czb3RKA?autoplay=1&mute=1&loop=1&playlist=jEy_czb3RKA',
-            videoThumbnail:
-              'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80',
-            technicalTips: [
-              'Empujar la pelvis hacia atrás como si quisieras tocar la pared con los glúteos.',
-              'Mancuernas pegadas a los muslos durante todo el recorrido.',
-              'Detener el descenso cuando la cadera no pueda retroceder más.',
-            ],
-            muscleGroup: 'Isquiosurales, glúteos, erectores de la columna',
-            commonMistakes: 'Flexionar la columna lumbar en lugar de articular la cadera.',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    weekNumber: 2,
-    title: 'Semana 2: Progresión de Volumen & Consolidación Técnica',
-    phaseName: 'Fase de Sobrecarga Inicial',
-    rirTarget: 'RIR 2 (2 repeticiones en reserva)',
-    volumeTarget: 'Incremento del 10% en tonelaje total',
-    description:
-      'Consolidación de las sensaciones de la primera semana, aumentando una serie efectiva y reduciendo el margen al fallo.',
-    coachAdvice:
-      'Mantén la misma técnica estricta aunque la fatiga acumulada sea mayor. Registra los pesos exactos utilizados en tu cuaderno de atleta.',
-    days: [
-      {
-        dayNumber: 1,
-        dayName: 'Día 1: Empuje & Pliometría Reactiva',
-        focus: 'Combinación de empuje pesado y transferencia reactiva al salto',
-        estimatedDuration: '65 min',
-        exercises: [
-          {
-            id: 'w2-d1-e1',
-            name: 'Press de Banca Plano con Parada',
-            category: 'Fuerza',
-            setsReps: '4 series x 6 repeticiones',
-            rir: 'RIR 2',
-            rest: '120 seg',
-            videoUrl: 'https://www.youtube-nocookie.com/embed/rT7DgCr-3pg?autoplay=1&mute=1&loop=1&playlist=rT7DgCr-3pg',
-            videoThumbnail:
-              'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80',
-            technicalTips: [
-              'Pausa de 1.5 segundos en el pecho.',
-              'Aceleración máxima concéntrica manteniendo contacto de escápulas.',
-            ],
-            muscleGroup: 'Pectoral, tríceps, deltoides anterior',
-            commonMistakes: 'Pérdida de arco dorsal o rebote en esternón.',
-          },
-          {
-            id: 'w2-d1-e2',
-            name: 'Saltos Reactivos al Cajón (Box Jumps)',
-            category: 'Potencia',
-            setsReps: '4 series x 5 repeticiones',
-            rir: 'Máxima explosividad',
-            rest: '90 seg',
-            videoUrl: 'https://www.youtube-nocookie.com/embed/52r_Ul5k03g?autoplay=1&mute=1&loop=1&playlist=52r_Ul5k03g',
-            videoThumbnail:
-              'https://images.unsplash.com/photo-1517963879433-6ad2b056d712?auto=format&fit=crop&w=800&q=80',
-            technicalTips: [
-              'Aterrizaje suave y silencioso amortiguando con cadera y rodillas.',
-              'Extensión completa de cadera en la parte superior del cajón.',
-              'Bajar dando un paso controlado, no rebotar de espaldas.',
-            ],
-            muscleGroup: 'Extensores de cadera, cuádriceps, gemelos, core',
-            commonMistakes: 'Aterrizar con impacto seco o altura del cajón desproporcionada.',
-          },
-        ],
-      },
-      {
-        dayNumber: 2,
-        dayName: 'Día 2: Pierna & Potencia de Aceleración',
-        focus: 'Fuerza unilateral y arranques explosivos en pista',
-        estimatedDuration: '65 min',
-        exercises: [
-          {
-            id: 'w2-d2-e1',
-            name: 'Sentadilla Búlgara con Mancuernas',
-            category: 'Fuerza',
-            setsReps: '3 series x 8 reps por pierna',
-            rir: 'RIR 2',
-            rest: '90 seg por pierna',
-            videoUrl: 'https://www.youtube-nocookie.com/embed/2C-uNgKwPLE?autoplay=1&mute=1&loop=1&playlist=2C-uNgKwPLE',
-            videoThumbnail:
-              'https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=800&q=80',
-            technicalTips: [
-              'Pie delantero firme sin levantar el talón.',
-              'Ligera inclinación del torso hacia adelante para enfatizar glúteo medio.',
-            ],
-            muscleGroup: 'Glúteo mayor y medio, cuádriceps, aductores',
-            commonMistakes: 'Apoyar demasiado peso en la pierna trasera.',
-          },
-          {
-            id: 'w2-d2-e2',
-            name: 'Aceleraciones de 20 Metros',
-            category: 'Potencia',
-            setsReps: '4 repeticiones a máxima velocidad',
-            rir: 'Esfuerzo 100%',
-            rest: '120 seg recuperación total',
-            videoUrl: 'https://www.youtube-nocookie.com/embed/gLlsgQc1uO8?autoplay=1&mute=1&loop=1&playlist=gLlsgQc1uO8',
-            videoThumbnail:
-              'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80',
-            technicalTips: [
-              'Ángulo de salida inclinado a 45 grados en los primeros 5 metros.',
-              'Brazos enérgicos y contacto en el metatarso con el suelo.',
-            ],
-            muscleGroup: 'Cadena posterior completa, flexores de cadera, tobillo reactivo',
-            commonMistakes: 'Erguirse de golpe en el primer paso.',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    weekNumber: 3,
-    title: 'Semana 3: Sobrecarga Progresiva & Máxima Densidad',
-    phaseName: 'Fase de Sobrecarga Máxima',
-    rirTarget: 'RIR 1–2 (Esfuerzo muy alto)',
-    volumeTarget: 'Pico de volumen y densidad metabólica',
-    description:
-      'La semana más demandante del ciclo. Se incrementan las cargas o las repeticiones por serie manteniendo tiempos de descanso cronometrados.',
-    coachAdvice:
-      'Duerme mínimo 8 horas y asegura tu consumo de proteína y carbohidratos complejos. Aquí es donde se forja el estímulo real de adaptación.',
-    days: [
-      {
-        dayNumber: 1,
-        dayName: 'Día 1: Fuerza Pura & Transferencia de Potencia',
-        focus: 'Sentadilla pesada y lanzamientos balísticos',
-        estimatedDuration: '70 min',
-        exercises: [
-          {
-            id: 'w3-d1-e1',
-            name: 'Sentadilla Trasera Pesada',
-            category: 'Fuerza',
-            setsReps: '5 series x 5 repeticiones',
-            rir: 'RIR 1',
-            rest: '150 seg',
-            videoUrl: 'https://www.youtube-nocookie.com/embed/MVMNk0HiTMg?autoplay=1&mute=1&loop=1&playlist=MVMNk0HiTMg',
-            videoThumbnail:
-              'https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=800&q=80',
-            technicalTips: [
-              'Máximo reclutamiento de core y respiración diafragmática profunda.',
-              'Salida agresiva desde el fondo con empuje coordinado de cadera.',
-            ],
-            muscleGroup: 'Cuádriceps, glúteos, erectores espinales, core',
-            commonMistakes: 'Perder tensión en el punto de estancamiento (sticking point).',
-          },
-          {
-            id: 'w3-d1-e2',
-            name: 'Lanzamientos de Balón Medicinal al Suelo (Slams)',
-            category: 'Potencia',
-            setsReps: '4 series x 8 repeticiones',
-            rir: 'Máxima potencia',
-            rest: '60 seg',
-            videoUrl: 'https://www.youtube-nocookie.com/embed/1Jc64fQ2x7o?autoplay=1&mute=1&loop=1&playlist=1Jc64fQ2x7o',
-            videoThumbnail:
-              'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=800&q=80',
-            technicalTips: [
-              'Elevación completa por encima de la cabeza extendiendo tobillos, rodillas y cadera.',
-              'Impacto violento hacia el suelo contrayendo activamente el abdomen.',
-            ],
-            muscleGroup: 'Dorsal ancho, recto abdominal, hombros, tríceps',
-            commonMistakes: 'Doblar la espalda al recoger el balón del suelo.',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    weekNumber: 4,
-    title: 'Semana 4: Pico de Intensidad & Test Submáximo / Descarga',
-    phaseName: 'Fase de Consolidación o Descarga Activa',
-    rirTarget: 'RIR 0–1 en test o RIR 4 si es descarga',
-    volumeTarget: 'Volumen reducido al 50% con intensidad preservada',
-    description:
-      'Evaluación de las adaptaciones de fuerza obtenidas a lo largo de las 4 semanas o descarga estratégica para supercompensación muscular.',
-    coachAdvice:
-      'Si sientes fatiga articular acumulada, aplica descarga activa (mismo peso pero la mitad de series). Si te sientes al 100%, realiza los tests submáximos programados.',
-    days: [
-      {
-        dayNumber: 1,
-        dayName: 'Día 1: Evaluación Técnica de Levantamientos Principales',
-        focus: 'Test submáximo controlado y registro de métricas',
-        estimatedDuration: '60 min',
-        exercises: [
-          {
-            id: 'w4-d1-e1',
-            name: 'Test de Sentadilla Submáxima (3RM Estimado)',
-            category: 'Fuerza',
-            setsReps: '3 series de aproximación + 1 serie x 3 reps al RIR 1',
-            rir: 'RIR 1',
-            rest: '180 seg',
-            videoUrl: 'https://www.youtube-nocookie.com/embed/MVMNk0HiTMg?autoplay=1&mute=1&loop=1&playlist=MVMNk0HiTMg',
-            videoThumbnail:
-              'https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=800&q=80',
-            technicalTips: [
-              'Grabación de la serie en video lateral para análisis biomecánico con Giovanni Mérida.',
-              'Velocidad de barra constante sin comprometer la profundidad legal.',
-            ],
-            muscleGroup: 'Cadena cinética inferior completa',
-            commonMistakes: 'Exceder el peso asignado comprometiendo la columna.',
-          },
-          {
-            id: 'w4-d1-e2',
-            name: 'Remo Ergómetro / Intervalo Aeróbico-Anaeróbico',
-            category: 'Metabólico',
-            setsReps: '5 intervalos de 500 metros con 90 seg de descanso',
-            rir: 'Pace constante a 1:45/500m',
-            rest: '90 seg',
-            videoUrl: 'https://www.youtube-nocookie.com/embed/zQ82RYIFLN8?autoplay=1&mute=1&loop=1&playlist=zQ82RYIFLN8',
-            videoThumbnail:
-              'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80',
-            technicalTips: [
-              'Secuencia biomecánica estricta: Piernas -> Cadera -> Brazos (y viceversa al regresar).',
-              'Respiración rítmica controlada en cada ciclo de palada.',
-            ],
-            muscleGroup: 'Capacidad cardiovascular y muscular sistémica',
-            commonMistakes: 'Jalar con los brazos antes de terminar el empuje de piernas.',
-          },
-        ],
-      },
-    ],
-  },
-];
+const WEEKS_DATA: WeekPlan[] = DEFAULT_WEEKS_DATA;
 
 export const AthletePortal: React.FC<AthletePortalProps> = ({
   user,
   planInfo,
+  weeksData,
+  weeksByLevel,
   onNavigateHome,
   onLogout,
   onScrollToBooking,
   trainerEmail = 'amauryuchiha@gmail.com',
 }) => {
+  const planName = planInfo?.planName || 'Performance';
+  const resolvedLevel: ProgramLevel =
+    planName === 'Fundation' || planName === 'Elite' || planName === 'Performance'
+      ? planName
+      : 'Performance';
+  const activeWeeks =
+    (weeksByLevel && weeksByLevel[resolvedLevel]) ||
+    (weeksData && weeksData.length > 0 ? weeksData : WEEKS_DATA);
   // Navigation tabs inside Portal: 'plan' | 'pago' | 'perfil'
   const [activeTab, setActiveTab] = useState<'plan' | 'pago' | 'perfil'>('plan');
 
@@ -439,7 +99,6 @@ export const AthletePortal: React.FC<AthletePortalProps> = ({
   const [profileSuccessMsg, setProfileSuccessMsg] = useState(false);
 
   // Membership & Billing calculations
-  const planName = planInfo?.planName || 'Performance';
   const planPrice = planInfo?.price || '$45 USD';
   const billingDay = 10; // 10th of every month
   const nextBillingDate = '10 de Diciembre de 2026';
@@ -472,7 +131,7 @@ export const AthletePortal: React.FC<AthletePortalProps> = ({
   };
 
   const activeWeekData =
-    WEEKS_DATA.find((w) => w.weekNumber === selectedWeek) || WEEKS_DATA[0];
+    activeWeeks.find((w) => w.weekNumber === selectedWeek) || activeWeeks[0];
 
   // Calculate completion percentage for the current week
   const allWeekExerciseIds = activeWeekData.days.flatMap((d) =>
@@ -665,7 +324,7 @@ export const AthletePortal: React.FC<AthletePortalProps> = ({
 
               {/* Week Buttons Grid */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                {WEEKS_DATA.map((week) => {
+                {activeWeeks.map((week) => {
                   const isCurrent = selectedWeek === week.weekNumber;
                   return (
                     <button
@@ -1283,13 +942,24 @@ export const AthletePortal: React.FC<AthletePortalProps> = ({
 
             {/* Video Player Frame */}
             <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black border border-zinc-800 shadow-xl">
-              <iframe
-                src={activeVideoModal.videoUrl}
-                title={activeVideoModal.name}
-                className="w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
+              {isDirectVideoFile(activeVideoModal.videoUrl) ? (
+                <video
+                  src={activeVideoModal.videoUrl}
+                  controls
+                  autoPlay
+                  loop
+                  playsInline
+                  className="w-full h-full object-contain bg-black"
+                />
+              ) : (
+                <iframe
+                  src={activeVideoModal.videoUrl}
+                  title={activeVideoModal.name}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              )}
             </div>
 
             {/* Biomechanical Cues and Checklist */}
