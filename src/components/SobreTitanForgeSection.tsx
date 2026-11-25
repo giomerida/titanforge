@@ -138,10 +138,10 @@ export const SobreTitanForgeSection: React.FC<SobreTitanForgeSectionProps> = ({
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Bloque 1: Forjar el cuerpo, Desarrollar el potencial */}
           <div className="space-y-6 max-w-4xl">
-            <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-normal tracking-tight text-black leading-tight flex flex-wrap items-center gap-x-2.5 gap-y-1">
+            <h2 className="text-[27px] sm:text-[32px] lg:text-[39px] font-normal tracking-tight text-black leading-tight flex flex-wrap items-center gap-x-2.5 gap-y-1">
               <span>Forjar el cuerpo,</span>
               <span className="font-bold">Desarrollar el potencial</span>
-              <BoldArrowUpRight className="w-6 h-6 sm:w-8 sm:h-8 text-black ml-1" />
+              <BoldArrowUpRight className="w-5 h-5 sm:w-7 sm:h-7 text-black ml-1" />
             </h2>
 
             <div className="space-y-4 text-sm sm:text-[15px] text-zinc-900 leading-relaxed max-w-2xl pt-2">
