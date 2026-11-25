@@ -28,8 +28,9 @@ interface NavbarProps {
   onNavigateToEnrollment?: () => void;
   onNavigateToAthletePortal?: () => void;
   onNavigateToAdminPortal?: () => void;
+  onNavigateToSobreTitanForge?: () => void;
   onNavigateHome?: () => void;
-  currentView?: 'landing' | 'inscripcion' | 'atleta' | 'admin';
+  currentView?: 'landing' | 'inscripcion' | 'atleta' | 'admin' | 'sobre-titanforge';
   trainerEmail?: string;
 }
 
@@ -43,6 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigateToEnrollment,
   onNavigateToAthletePortal,
   onNavigateToAdminPortal,
+  onNavigateToSobreTitanForge,
   onNavigateHome,
   currentView = 'landing',
   trainerEmail,
@@ -285,17 +287,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             type="button"
-            onClick={() => {
-              if (currentView !== 'landing') {
-                onNavigateHome?.();
-                setTimeout(() => {
-                  document.getElementById('sobre-titan-forge')?.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-              } else {
-                document.getElementById('sobre-titan-forge')?.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-            className="hover:text-[#E50914] text-zinc-700 transition-colors cursor-pointer font-semibold"
+            onClick={() => onNavigateToSobreTitanForge?.()}
+            className={`${
+              currentView === 'sobre-titanforge'
+                ? 'text-[#E50914] border-b-2 border-[#E50914] pb-0.5 font-bold'
+                : 'hover:text-[#E50914] text-zinc-700'
+            } transition-colors cursor-pointer font-semibold`}
           >
             Sobre Titan Forge
           </button>
@@ -753,16 +750,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
-                  if (currentView !== 'landing') {
-                    onNavigateHome?.();
-                    setTimeout(() => {
-                      document.getElementById('sobre-titan-forge')?.scrollIntoView({ behavior: 'smooth' });
-                    }, 100);
-                  } else {
-                    document.getElementById('sobre-titan-forge')?.scrollIntoView({ behavior: 'smooth' });
-                  }
+                  onNavigateToSobreTitanForge?.();
                 }}
-                className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-zinc-100 text-zinc-800 transition-colors cursor-pointer flex items-center justify-between"
+                className={`w-full text-left px-3.5 py-2.5 rounded-xl transition-colors cursor-pointer flex items-center justify-between ${
+                  currentView === 'sobre-titanforge'
+                    ? 'bg-red-50 text-[#E50914] font-bold'
+                    : 'hover:bg-zinc-100 text-zinc-800'
+                }`}
               >
                 <span>Sobre Titan Forge</span>
                 <ChevronRight className="w-4 h-4 opacity-50" />

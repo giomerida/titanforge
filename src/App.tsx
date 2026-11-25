@@ -12,6 +12,7 @@ import { BMICalculatorModal } from './components/BMICalculatorModal';
 import { EnrollmentSection, EnrollmentPlanInfo } from './components/EnrollmentSection';
 import { AthletePortal } from './components/AthletePortal';
 import { AdminPortal } from './components/AdminPortal';
+import { SobreTitanForgeSection } from './components/SobreTitanForgeSection';
 import { SERVICES_DATA, ServiceItem } from './data/landingData';
 import { initAuth, googleSignIn, logout } from './lib/firebase';
 import { BookingDetails } from './lib/googleWorkspace';
@@ -35,11 +36,14 @@ export default function App() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [selectedService, setSelectedService] = useState<ServiceItem>(SERVICES_DATA[1]); // Default to Intermedio
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<'landing' | 'inscripcion' | 'atleta' | 'admin'>(() => {
+  const [currentView, setCurrentView] = useState<'landing' | 'inscripcion' | 'atleta' | 'admin' | 'sobre-titanforge'>(() => {
     if (typeof window === 'undefined') return 'landing';
     if (window.location.hash === '#admin') return 'admin';
     if (window.location.hash === '#atleta') return 'atleta';
     if (window.location.hash === '#inscripcion') return 'inscripcion';
+    if (window.location.hash === '#sobre-titanforge' || window.location.hash === '#sobre-titan-forge') {
+      return 'sobre-titanforge';
+    }
     return 'landing';
   });
   const [enrollmentPlan, setEnrollmentPlan] = useState<EnrollmentPlanInfo | null>({
@@ -86,6 +90,11 @@ export default function App() {
         setCurrentView('atleta');
       } else if (window.location.hash === '#inscripcion') {
         setCurrentView('inscripcion');
+      } else if (
+        window.location.hash === '#sobre-titanforge' ||
+        window.location.hash === '#sobre-titan-forge'
+      ) {
+        setCurrentView('sobre-titanforge');
       } else if (window.location.hash === '' || window.location.hash === '#' || window.location.hash === '#inicio') {
         setCurrentView('landing');
       }
@@ -117,6 +126,12 @@ export default function App() {
   const handleNavigateToAdminPortal = () => {
     setCurrentView('admin');
     window.location.hash = 'admin';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigateToSobreTitanForge = () => {
+    setCurrentView('sobre-titanforge');
+    window.location.hash = 'sobre-titanforge';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -294,6 +309,7 @@ export default function App() {
         }}
         onNavigateToAthletePortal={handleNavigateToAthletePortal}
         onNavigateToAdminPortal={handleNavigateToAdminPortal}
+        onNavigateToSobreTitanForge={handleNavigateToSobreTitanForge}
         onNavigateHome={handleNavigateHome}
         currentView={currentView}
         trainerEmail={trainerEmail}
@@ -342,6 +358,16 @@ export default function App() {
             onNavigateToPortal={handleNavigateToAthletePortal}
             onBackToHome={handleNavigateHome}
             onAthleteEnrolled={handleAthleteEnrolled}
+          />
+        ) : currentView === 'sobre-titanforge' ? (
+          /* SECCIÓN INDEPENDIENTE: SOBRE TITANFORGE */
+          <SobreTitanForgeSection
+            onOpenCalculator={scrollToCalculator}
+            onScrollToBooking={() => {
+              setCurrentView('landing');
+              window.location.hash = 'reservas';
+              setTimeout(() => scrollToBooking(), 120);
+            }}
           />
         ) : (
           /* VISTA PRINCIPAL: LANDING COMPLETA */
